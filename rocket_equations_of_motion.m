@@ -1,4 +1,4 @@
-function states_i_dot = rocket_equations_of_motion(t,states_i)
+function states_i_dot = rocket_equations_of_motion(yaw,states_i)
 
 global rho        % air density
 global g_i       % force of gravity (earth fixed)
@@ -8,43 +8,61 @@ global A          % area matrix   [nose side side]
 global m          % total mass
 global I          % I matrix      [Ix Iy Iz]
 global r_cp2cg_b  % distance from cm to cg
-
+Fg_i   = m*g_i;
 %% states
-% pos_i  = states_i(1:3);
+  pos_i  = states_i(1:3);
   vel_i  = states_i(4:6);
   ang_i  = states_i(7:9); % earth-fixed -> (roll pitch yaw)(phi theta psi)
   angV_i = states_i(10:12);
 %% Calculate Angle of Attack
-  vel_i_angle = acos([(dot(vel_i,[1 0 0]')/norm(vel_i)); 
-                      (dot(vel_i,[0 1 0]')/norm(vel_i));
-                      (dot(vel_i,[0 0 1]')/norm(vel_i)) ]);
-  AOA = vel_i_angle + ang_i; % adjusts the initial angles to 0,0,0
-   %disp(rad2deg(AOA));
-%% calculate the rotation matrix ReB (earth-fixed to body)
-RiB =  angle2dcm(ang_i(3),ang_i(2),ang_i(1)); % R1(ang_i(3))*R2(ang_i(2))*R3(ang_i(1))
+  yaw   = pos_i(3);
+  pitch = pos_i(2);
+  roll  = pos_i(1);
+  
+  alpha = atan2(vel_i(3)/vel_i(1));
+  beta  = asin(vel_i(1)/norm(vel_i));
+  AOA   = [alpha; beta];
+  
+  ap    = atan2(vel_i(3)/vel_i(1));
+  ay    = atan2(vel_i(2)/vel_i(1));
 
-%% Aerodynamic forces (earth fixed)
-Cl =  2*pi*(AOA);
-Cd = .2*sin(AOA);
-q  = .5*rho*norm(vel_i)^2;  % dynamic pressure
-al_i = (Cl.*A*q)/m;
-ad_i = (Cd.*A*q)/m;
-a_ad_i  = al_i+ad_i;
+%% Aerodynamic coefficients
+Cd =  1.28*sin(norm(AOA));
+Cl =  2*pi*alpha;
+Cy =  2*pi*beta;
+q  =  0.5*rho*norm(vel_i)^2;  % dynamic pressure
 
-%% Calculate body-fixed force vectors
-g_b  = RiB * g_i;
-a_ad_b = RiB * ad_i;
+l = diam
+b = wingspan
+c = length of rocket
 
-%% Calculate net force and torque on the rocket
-anet_b = (g_b + a_ad_b);              % Net force
-Tcp_b  = cross(r_cp2cg_b,a_ad_b);    % Net torque about the center of gravity
+Lap = .2;
+Lay = .2;
+Lda = .2;
 
-anet_i = RiB'*anet_b + cross(angV_i,vel_i);
-Tcp_i  = RiB' * Tcp_b;
+Clap = Lap/(q*S*diam); % slope of rolling moment due to pitch
+Clay = lay/(q*S*diam); 
+Clda = Lda/(q*S*diam);
+%% Translational accelerations due to aerodynamics
+Ax = (T*cos(alpha)*cos(beta)-Cd*q*S)/Fg_i;
+Ay = (T*cos(alpha)*sin(beta)+Cy*q*S)/Fg_i;
+Az = (T*sin(alpha)+Cl*q*S)          /Fg_i;
+
+xDD = (Ax*cos(pitch)*cos(yaw)-Ay*sin(yaw)-Az*sin(pitch)*cos(yaw))*g_i;
+yDD = (Ax*cos(pitch)*sin(yaw)+Ay*cos(yaw)-Az*sin(pitch)*sin(yaw))*g_i;
+zDD = (1-Ax*sin(pitch)-Az*cos(pitch))                            *g_i;
+
+%% Rotational accelerations due to aerodynamics
+def_roll = 0;
+rollDD   = Q*R*((Iy-Iz)/Ix)+(q*S*diam/Ix)*(Clap*ap+Clay*ay+Clda*def_roll);
+pitchDD  = ((Iz-Ix)/Iy)*P*R+(q*S*diam/Iy)*(C
+yawDD    = 
+
+
 
 %% Solving for state time derivatives
 pos_i_dot  = vel_i;
-vel_i_dot  = anet_i;  % might not be right
+vel_i_dot  = [xDD;yDD;zDD];  % might not be right
 ang_i_dot  = angV_i;
 angV_i_dot = Tcp_i./I;   % might not be right
 
