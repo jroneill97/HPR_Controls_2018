@@ -19,8 +19,8 @@ m           = rocketParameters.m;
 I_b         = rocketParameters.I;
 L           = rocketParameters.L;
 
-Cd          = 1;
-Cl          = .4;
+Cd          = .1;
+Cl          = 1;
 
 delta       = rocketParameters.delta;
 noseL       = rocketParameters.noseL;
@@ -34,12 +34,11 @@ states = zeros(1,12); % initialize state matrix
 % ang velocity - 10:12
 
 % Define initial states
-states(6)  = 40;
-states(4)  = 1 ;
-states(1)  = 45;
-states(8)  = 0 ;
-states(11) = 1 ;
-states(10) = 1 ;
+states(6)  = 30;
+states(4)  = 1;
+states(7) = 0;
+states(8) = 0;
+states(11)= 0;
 
 % Define data rate
 dataRate = 1; % Hz
@@ -84,7 +83,7 @@ whitebg([0 .5 .6])
 axis off
 
 
-width  = 90;
+width  = 30;
 height = 90;
 %axis equal
 ax = axes('XLim',[0 width],'YLim',[-.5*width .5*width],'ZLim',[0 height]);   % Sets axis limits

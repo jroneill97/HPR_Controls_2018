@@ -38,21 +38,21 @@ quaternions = angle2quat(yaw,pitch,roll);
 % beta  = asin(vel_i(3)/norm(vel_i));
 
 %% External Forces (inertial frame)
-T_i   = quatrotate(quatconj(quaternions),[0 0 T])';
+T_i   = quatrotate(quatconj(quaternions),[0;0;T]);
 Fd_i  = -.5*Cd*rho*(pi*body_radius^2)*norm(vel_i)*vel_i;
 
-rcp_i = quatrotate(quatconj(quaternions),rcp_b')';
- vel_Norm = cross(vel_i,[0 0 1]');
- Vel_unit = vel_Norm/((norm(vel_Norm) == 0) + norm(vel_Norm));
+rcp_i = quatrotate(quatconj(quaternions),rcp_b);
+% vel_Norm = cross(vel_i,cross(vel_i,[0 0 1]'));
+% Vel_unit = vel_Norm/((norm(vel_Norm) == 0) + norm(vel_Norm));
 
-Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*Vel_unit; 
+Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*[0;0;0]; 
 Fg_i  = m*g_i;
 
 Fnet_i = T_i + Fd_i + Fl_i + Fg_i;
 
 %% External Moments (inertial frame)
 
-I_i   = quatrotate(quatconj(quaternions),I_b')';
+I_i   = quatrotate(quatconj(quaternions),I_b);
 
 Md_i  = cross(rcp_i,Fd_i);
 Ml_i  = cross(rcp_i,Fl_i);
