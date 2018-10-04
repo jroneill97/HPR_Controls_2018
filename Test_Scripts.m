@@ -7,6 +7,7 @@ load('rocketParameters.mat');
 
 g_i         = [0;0;-9.8];
 rho         = 1.225;
+t = 2;
 
 T           = 0;
 area        = rocketParameters.area;
