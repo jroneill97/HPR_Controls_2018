@@ -26,26 +26,22 @@ angVel_i = states_i(10:12);
 yaw   = ang_i(3);
 pitch = ang_i(2);
 roll  = ang_i(1); % rotating around length of rocket
-clc
-quaternions = angle2quat(yaw,pitch,roll); 
-% inertial to body quatrotate(quaternions,vector)
-% body to inertial quatrotate(quatconj(quaternions),vector)  
 
-% RiB = R1(yaw)*R2(pitch)*R3(roll);
-% RbI = RiB';
+quaternions = angle2quat(yaw,pitch,roll); % Quaternion vector
 
-% alpha = atan2(vel_i(3),vel_i(1));
-% beta  = asin(vel_i(3)/norm(vel_i));
+alpha = atan2(vel_i(3),vel_i(1));
+beta  = asin(vel_i(3)/norm(vel_i));
+
+AOA = acos(dot(vel_i,ang_i)/(((norm(vel_i)*norm(ang_i) == 0) + norm(vel_i)*norm(ang_i))));
 
 %% External Forces (inertial frame)
 T_i   = quatrotate(quatconj(quaternions),[0 0 T])';
 Fd_i  = -.5*Cd*rho*(pi*body_radius^2)*norm(vel_i)*vel_i;
 
 rcp_i = quatrotate(quatconj(quaternions),rcp_b')';
- vel_Norm = cross(vel_i,[0 0 1]');
- Vel_unit = vel_Norm/((norm(vel_Norm) == 0) + norm(vel_Norm));
-
-Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*Vel_unit; 
+ V = cross(vel_i,[1;0;0]) + cross(vel_i,[0;1;0]) + cross(vel_i,[0;0;1]);
+ V = V/norm(V);
+Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*cross(vel_i,rcp_i); 
 Fg_i  = m*g_i;
 
 Fnet_i = T_i + Fd_i + Fl_i + Fg_i;

@@ -7,6 +7,7 @@ load('rocketParameters.mat');
 
 g_i         = [0;0;-9.8];
 rho         = 1.225;
+t = 2;
 
 T           = 0;
 area        = rocketParameters.area;
@@ -19,8 +20,8 @@ m           = rocketParameters.m;
 I_b         = rocketParameters.I;
 L           = rocketParameters.L;
 
-Cd          = .1;
-Cl          = 1;
+Cd          = 1;
+Cl          = .4;
 
 delta       = rocketParameters.delta;
 noseL       = rocketParameters.noseL;
@@ -35,15 +36,16 @@ states = zeros(1,12); % initialize state matrix
 
 % Define initial states
 states(6)  = 30;
-states(4)  = 1;
-states(7) = 0;
-states(8) = 0;
-states(11)= 0;
+states(4)  = 0 ;
+states(1)  = 45;
+states(8)  = 0;
+states(11) = .001 ;
+states(10) = .01 ;
 
 % Define data rate
 dataRate = 1; % Hz
 
-tArray = [0:1/dataRate:20];
+tArray = [0:1/dataRate:10];
 t = 0;      % initialize t       
 for i = 2:length(tArray)
     [t_new,states_new] = ode45(@(t,y) updated_rocket_equations_of_motion(t,y),...
@@ -83,7 +85,7 @@ whitebg([0 .5 .6])
 axis off
 
 
-width  = 30;
+width  = 90;
 height = 90;
 %axis equal
 ax = axes('XLim',[0 width],'YLim',[-.5*width .5*width],'ZLim',[0 height]);   % Sets axis limits
