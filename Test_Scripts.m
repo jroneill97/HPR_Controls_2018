@@ -35,16 +35,17 @@ states = zeros(1,12); % initialize state matrix
 % ang velocity - 10:12
 
 % Define initial states
-states(6)  = 35;
-states(4)  = .1;
-states(1)  = 70/2;
+states(6)  = 50;
+states(4)  = 10;
+states(5)  = 0;
+states(1)  = 0;
 states(3)  = 0;
 states(8)  = .1;
 states(11) = 0 ;
 states(12) = 0 ;
 
 % Define data rate
-dataRate = 10; % Hz
+dataRate = 100; % Hz
 
 tArray = [0:1/dataRate:10];
 t = 0;      % initialize t       
@@ -87,7 +88,7 @@ axis off
 
 
 width  = 70;
-height = 70;
+height = 100;
 %axis equal
 ax = axes('XLim',[0 width],'YLim',[-.5*width .5*width],'ZLim',[0 height]);   % Sets axis limits
 grid on
@@ -108,7 +109,7 @@ angVel_i = states(:,10:12);
 clear states
 
 for i = 2:length(t)
-    pause((t(i)-t(i-1))/dataRate)
+    pause(.05*(t(i)-t(i-1))/dataRate)
     
     set(body,'Matrix',makehgtform('translate',pos_i(i,:)'+[0;0;dcg],...
                                   'zrotate'  ,ang_i(i,3)',...
