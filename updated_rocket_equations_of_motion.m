@@ -39,9 +39,11 @@ T_i   = quatrotate(quatconj(quaternions),[0 0 T])';
 Fd_i  = -.5*Cd*rho*(pi*body_radius^2)*norm(vel_i)*vel_i;
 
 rcp_i = quatrotate(quatconj(quaternions),rcp_b')';
- V = cross(vel_i,[1;0;0]) + cross(vel_i,[0;1;0]) + cross(vel_i,[0;0;1]);
- V = V/norm(V);
-Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*cross(vel_i,rcp_i); 
+vel_i_norm = vel_i - dot(vel_i,[0;0;1])*[0;0;1];
+vel_i_norm_unit = vel_i_norm/(norm(vel_i_norm) + (norm(vel_i_norm) == 0))
+
+
+Fl_i  = .5*Cl*rho*area*(norm(vel_i)^2)*vel_i_norm_unit;
 Fg_i  = m*g_i;
 
 Fnet_i = T_i + Fd_i + Fl_i + Fg_i;

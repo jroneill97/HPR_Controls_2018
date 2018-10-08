@@ -1,4 +1,4 @@
-clc; clear all; %close all;
+clc; clear all; close all;
 %% set global variables to those from the parameter datasets
 global rho g_i T area body_diam L m I_b delta noseL body_radius Cd Cl rcp_b dcg
 
@@ -20,7 +20,7 @@ m           = rocketParameters.m;
 I_b         = rocketParameters.I;
 L           = rocketParameters.L;
 
-Cd          = 10;
+Cd          = .4;
 Cl          = .4;
 
 delta       = rocketParameters.delta;
@@ -35,16 +35,16 @@ states = zeros(1,12); % initialize state matrix
 % ang velocity - 10:12
 
 % Define initial states
-states(6)  = 35.00001;
-states(4)  = .1 ;
-states(1)  = 45/2;
-states(3)  = 0
-states(8)  = 0;
+states(6)  = 35;
+states(4)  = .1;
+states(1)  = 70/2;
+states(3)  = 0;
+states(8)  = .1;
 states(11) = 0 ;
-states(10) = 0 ;
+states(12) = 0 ;
 
 % Define data rate
-dataRate = 1; % Hz
+dataRate = 10; % Hz
 
 tArray = [0:1/dataRate:10];
 t = 0;      % initialize t       
@@ -86,8 +86,8 @@ whitebg([0 .5 .6])
 axis off
 
 
-width  = 45;
-height = 45;
+width  = 70;
+height = 70;
 %axis equal
 ax = axes('XLim',[0 width],'YLim',[-.5*width .5*width],'ZLim',[0 height]);   % Sets axis limits
 grid on
