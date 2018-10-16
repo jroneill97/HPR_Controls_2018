@@ -17,41 +17,35 @@ t = 0;               % initialize t
 states = zeros(1,14); % initialize state matrix
 
 % User-defined initial states
-states(7)  = 0.0001;
-states(4)  = 1;
+states(7)  = 50;
 
 % User-defined time span and resolution
 t0 = 0;
 tf = 10;
 
-nsteps   = 500; % Number of steps between t0 and tf
+nsteps   = 50; % Number of steps between t0 and tf
 stepSize = 1/nsteps;
-tspan0    = t0:stepSize:tf; % Time span created from defined step size
+tspan    = t0:stepSize:tf; % Time span created from defined step size
 
 nip      = 100; % Number of integration points
 statesIC = states;   % State array used inside the loop
 
 % Re-map the thrust data
-thrust_H130 = interp1(H130.time,H130.thrust,tspan0);
-thrust_I170 = interp1(I170.time,I170.thrust,tspan0);
-for i = 1:length(tspan0)
-    if isnan(thrust_H130(i))
-        thrust_H130(i) = 0;
-    end
-    if isnan(thrust_I170(i))
-        thrust_I170(i) = 0;
-    end
-end
+thrust_H130 = interp1(H130.time,H130.thrust,tspan);
+thrust_I170 = interp1(I170.time,I170.thrust,tspan);
+for i = 1:length(tspan)
 
+
+hold on
+plot(tspan,thrust_H130)
+plot(tspan,thrust_I170)
 options = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
 for i = 1:nsteps  
     t1 = tf*(i-1)/nsteps;
     t2 = tf*i/nsteps;
     tspan = t1:(t2-t1)/nip:t2;
-    thrust = interp1(tspan0,thrust_H130,tspan,'spline');
     
-    %statesIC(:,15) = thrust;
-    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(tNew,statesIC,thrust,tspan,rocket),...
+    [tNew,tempStates] = ode45(@(tNew,xIC) EquationsOfMotion(tNew,xIC,thrust,rocket),...
                                tspan,statesIC,options);
                            
     t(i) = t2;
@@ -60,9 +54,8 @@ for i = 1:nsteps
     
     disp((i*100)/nsteps); % display percent completion
 end
-
 states = statesNew;
 % Animate the resulting state array
-ax = axes('XLim',[-100 100],'YLim',[-100 100],'ZLim',[0 max(states(:,3))]);
-whitebg([0 .5 .6])
-AnimateRocket(t,stepSize,states,ax,rocket);
+ax = axes('XLim',[0 10],'YLim',[-11 11],'ZLim',[0 122]);
+
+AnimateRocket(t,states,ax,rocket);

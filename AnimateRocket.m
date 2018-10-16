@@ -1,4 +1,4 @@
-function AnimateRocket(t,states,axes,rocket)
+function AnimateRocket(tspan,stepSize,states,ax,rocket)
 radius = rocket.body_diam / 2;
 % Draw the rocket and axis bars
 [xc, yc, zc]    = cylinder([radius  0]  ,5);    % nose cone
@@ -16,24 +16,24 @@ h(5) = surface(x ,z  ,   (y + rocket.dcg) ,'FaceColor','green','EdgeColor','none
 h(6) = surface(x ,y  , 2*(z + rocket.dcg) ,'FaceColor','red'  ,'EdgeColor','none');
 
 % Create rocket body from h
-body = hgtransform('Parent',axes);
+body = hgtransform('Parent',ax);
 set(h,'Parent',body);                % gathers all points in h into a single "parent"
 set(gcf,'Renderer','opengl');
-
+view([0 0]);
 % Animate the rocket trajectory
 pos_i    = states(:,1:3);
 
 [roll, pitch, yaw] = quat2angle(states(:,7:10));
 angPos_i           = [roll pitch yaw]; % angular position expressed in Euler angles
-axis off
 grid on
-for i = 1:length(t)    
-    set(body,'Matrix',makehgtform('translate',pos_i(i,:)'+[0;0;rocket.dcg],...
-                                  'zrotate'  ,angPos_i(i,3)',...
-                                  'yrotate'  ,angPos_i(i,2)',...
-                                  'xrotate'  ,angPos_i(i,1)',...
-                                  'translate',-(pos_i(i,:)'+[0;0;rocket.dcg]),...
-                                  'translate',pos_i(i,:)'));
+for i = 2:length(tspan) 
+    pause((tspan(i)-tspan(i-1))*stepSize)
+    set(body,'Matrix',makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
+                                  'zrotate'  ,angPos_i(i-1,3)',...
+                                  'yrotate'  ,angPos_i(i-1,2)',...
+                                  'xrotate'  ,angPos_i(i-1,1)',...
+                                  'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
+                                  'translate',pos_i(i-1,:)'));
     drawnow
 end
 
