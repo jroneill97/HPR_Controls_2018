@@ -6,33 +6,41 @@ rho = 1.225;
 g   = -9.8;
 load('rocket.mat');
 load('Thrust_Data.mat');
-
+% -----------------------------------------------
 % ---------- Reference for state array ---------- 
-% position     - 1:3 - x y z
-% velocity     - 4:6 - u v w
-% ang position - 7:10 - q1 q2 q3 q4
-% ang velocity - 11:13
+% -----------------------------------------------
+% position         - 1:3 - x y z
+% velocity         - 4:6 - u v w
+% angular position - 7:10 - q1 q2 q3 q4
+% angular velocity - 11:13
 
 %% Define the time span and the initial states
-t = 0;                % initialize t 
+
+
+
+%% --------- Define initial states, time span, and resolution here --------
 states = zeros(1,13); % initialize state matrix
 
-% --------- Define initial states, time span, and resolution here ---------
-states(6)   = 0;
-states(7:10) = angle2quat(0,0,0,'ZXZ'); % Using ZXZ (classic euler) for all rotations
-states(10:13)= [0 . 0 0];
+yaw   = 0.0;
+pitch = 0.0;
+roll  = 0.0;
+states(7:10) = circshift(angle2quat(yaw,pitch,roll),-1) % Using ZYX for all rotations
+states(11:13)= [0.5 0.5 5];
+states(1) = 1;
 
 t0 = 0;
-tf = 10;
-
+tf = 5;
+nip      = 100; % Number of integration points
 nsteps   = 500; % Number of steps between t0 and tf ("resolution")
+
+t = 0;          % initialize t (don't change)
+% -------------------------------------------------------------------------
+%% Define the initial state and time span arrays
 stepSize = 1/nsteps;
 tspan0    = t0:stepSize:tf; % Total time span
+statesIC = states;          % State array used inside the loop
 
-nip      = 100; % Number of integration points
-statesIC = states;   % State array used inside the loop
-
-%% Re-map the thrust data
+%% Re-map the thrust data to fit the time span array
 thrust_H130 = .3*interp1(H130.time,H130.thrust,tspan0);
 thrust_I170 = .3*interp1(I170.time,I170.thrust,tspan0);
 for i = 1:length(tspan0)
