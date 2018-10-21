@@ -3,21 +3,33 @@ global rho g
 [d,time_index] = min(abs(t-tspan));
 thrust    = thrust(time_index); % Finds the thrust value corresponding to T
 
+states(11) = states(11);
+states(12) = states(12);
+states(13) = states(13);
+
 % External Forces (inertial frame)
 
 
 % External Moments (inertial frame)
+Mnet = [0 0 0];
 
+% Euler Equations
+omega = [[0            states(13) -states(12) states(11)];
+         [-states(13)  0           states(11) states(12)];
+         [ states(12) -states(11)  0          states(13)];
+         [-states(11) -states(12) -states(13) 0         ]]; % still don't know what this is
+     
+H      = (rocket.I)*w_b;                   % angular momentum
+wdot_b = 
 
 % Define states_i_dot as the solutions to the equations of motion
 
+posdot_b = states(4:6);                       % position
+veldot_b = [0;0;(g*rocket.m)+thrust];         % body fixed acceleration
+qdot_b   = 0.5*omega*states(7:10);            % time derivative of quaternions
+wdot_b   = (Mnet-cross(w_b,H)) ./ (rocket.I); % body fixed angular acceleration
 
-pos_i_dot    = .01*[thrust;thrust;thrust]; % inertial position
-vel_i_dot    = zeros(3,1); % inertial acceleration (transport theorerocket.m)
-angPos_i_dot = zeros(4,1); % inertial angular velocity
-angVel_i_dot = zeros(4,1); % inertial angular acceleration
-
-states_i_dot = [pos_i_dot; vel_i_dot; angPos_i_dot; angVel_i_dot; states(15)];
+states_i_dot = [posdot_b; veldot_b; qdot_b; wdot_b];
 
 
 

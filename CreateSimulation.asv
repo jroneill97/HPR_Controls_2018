@@ -1,61 +1,69 @@
 clc; clear all; close all;
 
-% Define parameters used throughout the simulation
+%% Define parameters used throughout the simulation
 global rho g
 rho = 1.225;
 g   = -9.8;
 load('rocket.mat');
 load('Thrust_Data.mat');
 
-% ------------------------------------------------------------------------
+% ---------- Reference for state array ---------- 
 % position     - 1:3 - x y z
 % velocity     - 4:6 - u v w
 % ang position - 7:10 - q1 q2 q3 q4
-% ang velocity - 11:14
+% ang velocity - 11:13
 
-t = 0;               % initialize t 
-states = zeros(1,14); % initialize state matrix
+%% Define the time span and the initial states
+t = 0;                % initialize t 
+states = zeros(1,13); % initialize state matrix
 
-% User-defined initial states
-states(7)  = 50;
+% --------- Define initial states, time span, and resolution here ---------
+states(6)   = 0;
+states(7:10) = angle2quat(0,0,0,'ZXZ'); % Using ZXZ (classic euler) for all rotations
+states(10:13)= [0 . 0 0];
 
-% User-defined time span and resolution
 t0 = 0;
 tf = 10;
 
-nsteps   = 50; % Number of steps between t0 and tf
+nsteps   = 500; % Number of steps between t0 and tf ("resolution")
 stepSize = 1/nsteps;
-tspan    = t0:stepSize:tf; % Time span created from defined step size
+tspan0    = t0:stepSize:tf; % Total time span
 
 nip      = 100; % Number of integration points
 statesIC = states;   % State array used inside the loop
 
-% Re-map the thrust data
-thrust_H130 = interp1(H130.time,H130.thrust,tspan);
-thrust_I170 = interp1(I170.time,I170.thrust,tspan);
-for i = 1:length(tspan)
+%% Re-map the thrust data
+thrust_H130 = .3*interp1(H130.time,H130.thrust,tspan0);
+thrust_I170 = .3*interp1(I170.time,I170.thrust,tspan0);
+for i = 1:length(tspan0)
+    if isnan(thrust_H130(i))
+        thrust_H130(i) = 0;
+    end
+    if isnan(thrust_I170(i))
+        thrust_I170(i) = 0;
+    end
+end
 
-
-hold on
-plot(tspan,thrust_H130)
-plot(tspan,thrust_I170)
+%% Solve the equations of motion
 options = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
 for i = 1:nsteps  
     t1 = tf*(i-1)/nsteps;
     t2 = tf*i/nsteps;
     tspan = t1:(t2-t1)/nip:t2;
+    thrust = interp1(tspan0,thrust_H130,tspan,'spline');
     
-    [tNew,tempStates] = ode45(@(tNew,xIC) EquationsOfMotion(tNew,xIC,thrust,rocket),...
+    %statesIC(:,15) = thrust;
+    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(tNew,statesIC,thrust,tspan,rocket),...
                                tspan,statesIC,options);
                            
     t(i) = t2;
-    statesIC = tempStates(nip+1,1:14)';
+    statesIC = tempStates(nip+1,1:13)';
     statesNew(i,:) = statesIC';
     
     disp((i*100)/nsteps); % display percent completion
 end
 states = statesNew;
-% Animate the resulting state array
-ax = axes('XLim',[0 10],'YLim',[-11 11],'ZLim',[0 122]);
 
-AnimateRocket(t,states,ax,rocket);
+%% Animate the resulting state array
+whitebg([0 .5 .6])
+AnimateRocket(t,states,stepSize,rocket);

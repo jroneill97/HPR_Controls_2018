@@ -1,39 +1,40 @@
 clc; clear all; close all;
 
-% Define parameters used throughout the simulation
+%% Define parameters used throughout the simulation
 global rho g
 rho = 1.225;
 g   = -9.8;
 load('rocket.mat');
 load('Thrust_Data.mat');
 
-% ------------------------------------------------------------------------
+% ---------- Reference for state array ---------- 
 % position     - 1:3 - x y z
 % velocity     - 4:6 - u v w
 % ang position - 7:10 - q1 q2 q3 q4
-% ang velocity - 11:14
+% ang velocity - 11:13
 
-t = 0;               % initialize t 
-states = zeros(1,14); % initialize state matrix
+%% Define the time span and the initial states
+t = 0;                % initialize t 
+states = zeros(1,13); % initialize state matrix
 
-% User-defined initial states
-states(7)  = 0.0001;
-states(4)  = 1;
+% --------- Define initial states, time span, and resolution here ---------
+states(7:10) = circshift(angle2quat(0,0,0),-1) % Using ZYX for all rotations
+states(11:13)= [.5 .5 5];
+states(1) = 1;
 
-% User-defined time span and resolution
 t0 = 0;
-tf = 10;
+tf = 5;
 
-nsteps   = 500; % Number of steps between t0 and tf
+nsteps   = 500; % Number of steps between t0 and tf ("resolution")
 stepSize = 1/nsteps;
-tspan0    = t0:stepSize:tf; % Time span created from defined step size
+tspan0    = t0:stepSize:tf; % Total time span
 
 nip      = 100; % Number of integration points
 statesIC = states;   % State array used inside the loop
 
-% Re-map the thrust data
-thrust_H130 = interp1(H130.time,H130.thrust,tspan0);
-thrust_I170 = interp1(I170.time,I170.thrust,tspan0);
+%% Re-map the thrust data
+thrust_H130 = .3*interp1(H130.time,H130.thrust,tspan0);
+thrust_I170 = .3*interp1(I170.time,I170.thrust,tspan0);
 for i = 1:length(tspan0)
     if isnan(thrust_H130(i))
         thrust_H130(i) = 0;
@@ -43,6 +44,7 @@ for i = 1:length(tspan0)
     end
 end
 
+%% Solve the equations of motion
 options = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
 for i = 1:nsteps  
     t1 = tf*(i-1)/nsteps;
@@ -55,14 +57,13 @@ for i = 1:nsteps
                                tspan,statesIC,options);
                            
     t(i) = t2;
-    statesIC = tempStates(nip+1,1:14)';
+    statesIC = tempStates(nip+1,1:13)';
     statesNew(i,:) = statesIC';
     
     disp((i*100)/nsteps); % display percent completion
 end
-
 states = statesNew;
-% Animate the resulting state array
-ax = axes('XLim',[-100 100],'YLim',[-100 100],'ZLim',[0 max(states(:,3))]);
+
+%% Animate the resulting state array
 whitebg([0 .5 .6])
-AnimateRocket(t,stepSize,states,ax,rocket);
+AnimateRocket(t,states,stepSize,rocket);
