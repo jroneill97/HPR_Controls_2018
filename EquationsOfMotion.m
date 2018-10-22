@@ -32,9 +32,3 @@ states_i_dot = [posdot_i; veldot_i; qdot; wdot];
 
 
 
-
-
-
-
-
-

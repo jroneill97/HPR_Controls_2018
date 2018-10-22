@@ -18,19 +18,19 @@ load('Thrust_Data.mat');
 states = zeros(1,13); % initialize state matrix
 
 yaw   = 0.0;
-pitch = 0.05;
+pitch = 0.1;
 roll  = 0.0;
 states(7:10) = circshift(angle2quat(yaw,pitch,roll),-1); % Using ZYX for all rotations
 states(11:13)= [0.0 0.0 0.0];
 states(1) = 0;
 states(6) = 0.0;
 
-t0 = 0;         % Initial Time
-tf = 10;        % Final Time
-nip      = 50;   % Number of integration points
+t0       = 0;   % Initial Time
+tf       = 10;  % Final Time
+nip      = 50;  % Number of integration points
 nsteps   = 250; % Number of steps between t0 and tf ("resolution")
 
-t = t0;          % initialize t
+t = t0;         % initialize t
 % -------------------------------------------------------------------------
 %% Define the initial state and time span arrays
 stepSize = 1/nsteps;
@@ -66,7 +66,11 @@ for i = 1:nsteps
     
     disp((i*100)/nsteps); % display percent completion
 end
+clearvars -except t states stepSize rocket
 
 %% Animate the resulting state array
-    whitebg([0 .5 .6])
+    whitebg([0 .5 .6]);
     AnimateRocket(t,states,stepSize,rocket);
+    
+    
+    
