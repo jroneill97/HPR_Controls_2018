@@ -1,4 +1,4 @@
-function AnimateRocket(tspan,states,stepSize,rocket)
+function AnimateRocket(tspan,states,rocket,zoom,camera)
 
 %% Draw the rocket body
 radius = rocket.body_diam / 2;
@@ -39,17 +39,30 @@ u     = states(:,7:9)./sin(theta/2);  % euler axis of rotation
 
 %% Animate the rocket flight
 view([0 0]);
-camproj perspective
-camlookat(h); % Set the initial camera view to the rocket
-
-for i = 2:length(tspan) 
-    pause(.1)
-    set(rocketBody,'Matrix',makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
-                                  'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
-                                  'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
-                                  'translate',pos_i(i-1,:)'));  
-    campos([pos_i(i-1,1) + 200, 0, pos_i(i-1,3) + 10]);
-    camtarget(pos_i(i-1,:));
-    drawnow
-    
+switch camera
+    case 'follow'
+           camproj perspective
+           camlookat(h); % Set the initial camera view to the rocket
+           for i = 2:length(tspan) 
+               pause(0.025)
+                 set(rocketBody,'Matrix',...
+                     makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
+                                 'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
+                                 'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
+                                 'translate',pos_i(i-1,:)'));  
+                 campos([pos_i(i-1,1) + zoom, 0, pos_i(i-1,3)]);
+                 camtarget(pos_i(i-1,:));
+                 drawnow
+           end
+    case 'stationary'
+           for i = 2:length(tspan) 
+                 pause(0.025)
+                 set(rocketBody,'Matrix',...
+                     makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
+                                 'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
+                                 'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
+                                 'translate',pos_i(i-1,:)'));  
+                     camtarget(pos_i(i-1,:));                             
+                 drawnow
+           end
 end
