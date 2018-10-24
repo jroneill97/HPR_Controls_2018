@@ -25,7 +25,7 @@ switch cameraMode
                   'ZLim',[min(states(:,3))-100 max(states(:,3))+100])
         grid on
         box on
-        %axis equal
+        axis equal
     case 'stationary'
         axis off
         ax = axes('XLim',[min(states(:,1))-100 max(states(:,1))+100],...
@@ -55,16 +55,15 @@ switch cameraMode
            camproj perspective
            camlookat(h); % Set the initial camera view to the rocket
            view([0 0]);
-
            for i = 2:length(tspan)
-            pause(1)
+            pause(.1)
             set(rocketBody,'Matrix',...
                makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
                            'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
                            'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
                            'translate',pos_i(i-1,:)')); 
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
-                 camtarget(pos_i(i-1,:));                
+                 camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                
             drawnow
            end
     case 'stationary'

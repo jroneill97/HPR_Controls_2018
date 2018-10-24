@@ -5,7 +5,7 @@ load motorCluster;
 global dynamicPressure g Fg_i
 dynamicPressure  = 0.5*(1.225)*rocket.area;
 g    = 9.8;
-Fg_i = [0; 0; g*rocket.m]; % force of gravity in the Inertial Frame
+Fg_i = [0; 0; -g*rocket.m]; % force of gravity in the Inertial Frame
 % -----------------------------------------------
 % ---------- Reference for state array ---------- 
 % -----------------------------------------------
@@ -17,15 +17,15 @@ Fg_i = [0; 0; g*rocket.m]; % force of gravity in the Inertial Frame
 %% --------- Define initial states, time span, and resolution here --------
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.0;
+initial_yaw   = 0.000001;
 initial_pitch = 0.0;
 initial_roll  = 0.0;
 states(7:10)  = circshift(angle2quat(initial_yaw,initial_pitch,initial_roll),-1) % Using ZYX for all rotations
-states(11:13) = [0.0 0.0 0.0];
-states(4)     = 0.000001;
+states(11:13) = [-0.5 0.0 0.0];
+states(4)     = 1;
 
 t0       = 0;     % Initial Time
-tf       = 10;    % Final Time
+tf       = 100;    % Final Time
 nip      = 2;     % Number of integration points
 nsteps   = 500;   % Number of steps between t0 and tf ("resolution")
 
@@ -48,11 +48,6 @@ for i = 1:nsteps
     temp_tspan = t1:(t2-t1)/nip:t2;
     % can include if statement to stop calling this function
     tempThrustCurves = CreateThrustCurves(motorCluster,temp_tspan);
-%% Find thrust values
-
-%% Find Lift and Drag forces
-
-    
 %% Solve the ODE    
     [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(tNew,statesIC,temp_tspan,rocket,...
                                                                  dynamicPressure,Fg_i,...
@@ -78,6 +73,6 @@ disp(apogee);
 %% Animate the resulting state array
 whitebg([1 1 1]);
 close all;
-zoom = 50; % Distance from camera to the rocket (m)
+zoom = 10; % Distance from camera to the rocket (m)
 AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
      
