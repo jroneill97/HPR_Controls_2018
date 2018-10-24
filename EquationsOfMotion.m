@@ -8,15 +8,15 @@ q            = states(7:10);
     for j = 1:7 % Finds the thrust value corresponding to current time
         thrust_b(j)     = thrustCurves(j).thrust(time_index);
     end   
-    netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
+    netThrust_b   = [sum(thrust_b,2);0;0]; % sum of all the thrusts from each motor
     netThrust_i   = quatrotate(quatconj(qScalarFirst'),netThrust_b')'; 
 
 % Aerodynamic forces
     vel_i = states(4:6);
     speed = norm(vel_i);
     
-    alpha = atan2(vel_i(1),vel_i(3));
-    beta  = atan2(vel_i(2),vel_i(3));
+    alpha = atan2(vel_i(3),vel_i(1));
+    beta  = asin(vel_i(2)/speed);
     
     Cl = 2*pi*alpha;
     
@@ -24,8 +24,11 @@ q            = states(7:10);
     Lbeta_v         = dynamicPressure*(speed^2)*Cl;
     D_v             = dynamicPressure*(speed^2)*rocket.Cd;
     
-    Fad_v           = [Lbeta_v; Lalpha_v; -D_v];
-    Rvel2body     = (R2(-alpha)*R1(beta))';
+    Fad_v           = [-D_v;
+                       Lbeta_v;
+                       Lalpha_v];
+                   
+    Rvel2body     = (R2(-alpha)*R3(beta))';
     Fad_b         = Rvel2body *Fad_v;
     Fad_i         = quatrotate(quatconj(qScalarFirst'),Fad_b')';
     
@@ -33,7 +36,7 @@ q            = states(7:10);
     Fnet_i = Fg_i + netThrust_i + Fad_i; % Net force in the Inertial Frame
 
 %% External Moments (inertial frame)
-    rcp_i  = quatrotate(quatconj(qScalarFirst'),[0 0 -rocket.dcg])'; % distance from the cp to cg
+    rcp_i  = quatrotate(quatconj(qScalarFirst'),[-rocket.dcg 0 0])'; % distance from the cp to cg
     Mad_i  = cross(rcp_i,Fad_i);
 
 

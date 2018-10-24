@@ -5,7 +5,7 @@ load motorCluster;
 global dynamicPressure g Fg_i
 dynamicPressure  = 0.5*(1.225)*rocket.area;
 g    = 9.8;
-Fg_i = [0; 0; -g*rocket.m]; % force of gravity in the Inertial Frame
+Fg_i = [0; 0; g*rocket.m]; % force of gravity in the Inertial Frame
 % -----------------------------------------------
 % ---------- Reference for state array ---------- 
 % -----------------------------------------------
@@ -22,8 +22,7 @@ initial_pitch = 0.0;
 initial_roll  = 0.0;
 states(7:10)  = circshift(angle2quat(initial_yaw,initial_pitch,initial_roll),-1) % Using ZYX for all rotations
 states(11:13) = [0.0 0.0 0.0];
-states(5)     = 0.0;
-states(6)     = 0.0000000001;
+states(4)     = 0.000001;
 
 t0       = 0;     % Initial Time
 tf       = 10;    % Final Time
@@ -34,7 +33,7 @@ t = t0;         % initialize t
 % -------------------------------------------------------------------------
 %% Define the initial state and time span arrays
 stepSize = tf/nsteps;
-tspan0    = [t0:stepSize:tf]'; % Total time span
+tspan0   = [t0:stepSize:tf]'; % Total time span
 statesIC = states';            % State array used inside the loop
 
 %% Re-map the thrust data to fit the time span array

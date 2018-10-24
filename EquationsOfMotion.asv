@@ -8,7 +8,7 @@ q            = states(7:10);
     for j = 1:7 % Finds the thrust value corresponding to current time
         thrust_b(j)     = thrustCurves(j).thrust(time_index);
     end   
-    netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
+    netThrust_b   = [sum(thrust_b,2);0;0]; % sum of all the thrusts from each motor
     netThrust_i   = quatrotate(quatconj(qScalarFirst'),netThrust_b')'; 
 
 % Aerodynamic forces
@@ -16,9 +16,9 @@ q            = states(7:10);
     speed = norm(vel_i);
     
     alpha = atan2(vel_i(3),vel_i(1));
-    beta  = 1.5708 - atan2(vel_i(3),vel_i(2));
+    beta  = asin(vel_i(2),speed);
     
-    Cl = 0;
+    Cl = 2*pi*alpha;
     
     Lalpha_v        = dynamicPressure*(speed^2)*Cl;
     Lbeta_v         = dynamicPressure*(speed^2)*Cl;
