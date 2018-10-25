@@ -1,4 +1,5 @@
-function states_i_dot = EquationsOfMotion(t,states,tspan,rocket,dynamicPressure,Fg_i,thrustCurves)
+function states_i_dot = EquationsOfMotion(t,states,tspan,rocket,thrustCurves)
+global dynamicPressure Fg_i
 qScalarFirst = circshift(states(7:10),1);
 q            = states(7:10);
 %% External Forces (inertial frame)
@@ -11,7 +12,7 @@ q            = states(7:10);
     netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
     netThrust_i   = quatrotate(quatconj(qScalarFirst'),netThrust_b')'; 
 
-% Aerodynamic forces
+% Aerodynamic forces due to rocket body
     vel_i = states(4:6);
     speed = norm(vel_i);
     
@@ -30,15 +31,23 @@ q            = states(7:10);
     Fad_b         = Rvel2body *Fad_v;
     Fad_i         = quatrotate(quatconj(qScalarFirst'),Fad_b')';
     
+% Aerodynamic forces due to fin deflection
+    
+
 % Net External forces
     Fnet_i = Fg_i + netThrust_i + Fad_i; % Net force in the Inertial Frame
 
 %% External Moments (inertial frame)
-    rcp_i  = quatrotate(quatconj(qScalarFirst'),[0 0 -rocket.dcg])'; % distance from the cp to cg
-    Mad_i  = cross(rcp_i,Fad_i);
 
+% Moment due to aerodynamic force of rocket body
+    cp2cg_b  = rocket.dcp-rocket.dcg;
+    cp2cg_i  = quatrotate(quatconj(qScalarFirst'),cp2cg_b')'; % distance from the cp to cg in inertial frame
+    Mad_i    = cross(cp2cg_i,Fad_i);
+    
+% Moments due to fin deflection
+    Mfins    = [0;0;0];
 
-    Mnet_i = Mad_i;
+    Mnet_i = Mad_i + Mfins;
 %% Omega Matrix and angular momentum to calculate qdot
     Omega = [[0            states(13) -states(12) states(11)];
              [-states(13)  0           states(11) states(12)];

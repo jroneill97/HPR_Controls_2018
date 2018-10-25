@@ -10,11 +10,11 @@ radius = rocket.body_diam / 2;
 [x,   y,   z  ] = cylinder( 0.005       ,7);    % axis bars
 % Rocket body
 h(1) = surface(xc,yc , (rocket.noseL*zc+(rocket.L-rocket.noseL))        ,'FaceColor','white');
-h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - rocket.dcg)*za + rocket.dcg)  ,'FaceColor','white');
-h(3) = surface(xb,yb , (rocket.dcg*zb)                                  ,'FaceColor','white');
+h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - rocket.dcg(3))*za + rocket.dcg(3))  ,'FaceColor','white');
+h(3) = surface(xb,yb , (rocket.dcg(3)*zb)                                  ,'FaceColor','white');
 % Axis bars
-h(4) = surface(z ,x  , (y + rocket.dcg) ,'FaceColor','blue' ,'EdgeColor','none');
-h(5) = surface(x ,z  , (y + rocket.dcg) ,'FaceColor','green','EdgeColor','none');
+h(4) = surface(z ,x  , (y + rocket.dcg(3)) ,'FaceColor','blue' ,'EdgeColor','none');
+h(5) = surface(x ,z  , (y + rocket.dcg(3)) ,'FaceColor','green','EdgeColor','none');
 h(6) = surface(x ,y  , (z + rocket.L)   ,'FaceColor','red'  ,'EdgeColor','none');
 
 switch cameraMode
@@ -58,9 +58,9 @@ switch cameraMode
            for i = 2:length(tspan)
             pause(.1)
             set(rocketBody,'Matrix',...
-               makehgtform('translate',pos_i(i-1,:)'+[0;0;rocket.dcg],...
+               makehgtform('translate',pos_i(i-1,:)'+rocket.dcg,...
                            'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
-                           'translate',-(pos_i(i-1,:)'+[0;0;rocket.dcg]),...
+                           'translate',-(pos_i(i-1,:)'+rocket.dcg),...
                            'translate',pos_i(i-1,:)')); 
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                

@@ -20,7 +20,7 @@ states = zeros(1,13); % initialize state matrix
 initial_yaw   = 0.000001;
 initial_pitch = 0.0;
 initial_roll  = 0.0;
-states(7:10)  = circshift(angle2quat(initial_yaw,initial_pitch,initial_roll),-1) % Using ZYX for all rotations
+states(7:10)  = circshift(angle2quat(initial_yaw,initial_pitch,initial_roll),-1); % Using ZYX for all rotations
 states(11:13) = [-0.5 0.0 0.0];
 states(4)     = 1;
 
@@ -50,7 +50,6 @@ for i = 1:nsteps
     tempThrustCurves = CreateThrustCurves(motorCluster,temp_tspan);
 %% Solve the ODE    
     [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(tNew,statesIC,temp_tspan,rocket,...
-                                                                 dynamicPressure,Fg_i,...
                                                                  tempThrustCurves),...
                                                                  temp_tspan,statesIC,options);
     
