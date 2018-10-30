@@ -1,18 +1,13 @@
-function states_i_dot = EquationsOfMotion(t,states,tspan,rocket,thrustCurves,Fx,Fy)
+function states_i_dot = EquationsOfMotion(t,states,tspan,rocket,thrust_b,Fx,Fy,Ffins)
 global aeroConstant Fg_i
+
+%% Define the quaternions
 qScalarFirst = circshift(states(7:10),1);
 q            = states(7:10);
 %% External Forces (inertial frame)
 
-% Thrust Forces
-    [d,time_index] = min(abs(t-tspan)); % This does the same thing as the find() command
-    for j = 1:7 % Finds the thrust value corresponding to current time
-      thrust_b(j) = thrustCurves(j).thrust(time_index);
-    end   
-    netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
-    netThrust_i   = quatrotate(quatconj(qScalarFirst'),netThrust_b')'; 
 % Force due to wind
-    Fwind_i    = 50*[Fx; Fy; 0];
+    Fwind_i    = [Fx; Fy; 0];
     
 % Aerodynamic forces due to rocket body
     vel_i      = states(4:6);
@@ -21,31 +16,34 @@ q            = states(7:10);
 
     alpha  = atan2(vel_b(1),vel_b(3));
     beta   = asin(vel_b(2)/speed);
+    
     Cx_v       = rocket.Cla * (alpha);
     Cy_v       = rocket.Clb * (beta);
-    Cz_v       = .1*rocket.Cd0 * cos(.5*(alpha+beta));
+    Cz_v       = .01*rocket.Cd0; % Estimating the drag to be directly opposite the nose
     C_v        = [-Cx_v; -Cy_v; -Cz_v];
     
     Fad_v      = aeroConstant*(speed^2).*C_v;
-    
-    q_ab = angle2quat(-alpha,beta,0,'YZY');
-    Fad_b = quatrotate(quatconj(q_ab),Fad_v')';
-% %     
-%      Rvel2body  = (R2(-alpha)*R3(beta))';
-%      Fad_b      = Rvel2body * Fad_v
+
+      Rvel2body     = (R2(-alpha)*R3(beta))';
+      Fad_b         = Rvel2body *Fad_v;
+
     Fad_i      = quatrotate(quatconj(qScalarFirst'),Fad_b')';
     
-% Aerodynamic forces due to fin deflection
-    
+% Thrust force in inertial frame
+    netThrust_i   = quatrotate(quatconj(qScalarFirst'),thrust_b')'; 
 
 % Net External forces
-    Fnet_i     = Fg_i + netThrust_i + Fad_i + Fwind_i; % Net force in the Inertial Frame
+    Fnet_i     = Fg_i + netThrust_i + Fad_i + Fwind_i; % + FfinNet_i; % Net force in the Inertial Frame
 
 %% External Moments (inertial frame)
 
-% Moment due to aerodynamic force of rocket body
     cp2cg_b    = rocket.dcp-rocket.dcg;
     cp2cg_i    = quatrotate(quatconj(qScalarFirst'),cp2cg_b')'; % distance from the cp to cg in inertial frame
+
+% Moments due to fin torque
+
+
+% Moment due to aerodynamic force of rocket body
     Mad_i      = cross(cp2cg_i,Fad_i);
     
 % Moments due to wind

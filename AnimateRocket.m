@@ -22,7 +22,7 @@ switch cameraMode
         axis off
         ax = axes('XLim',[min(states(:,1))-100 max(states(:,1))+100],...
                   'YLim',[min(states(:,2))-100 max(states(:,2))+100],...
-                  'ZLim',[min(states(:,3))-100 max(states(:,3))+100])
+                  'ZLim',[min(states(:,3))-100 max(states(:,3))+100]);
         grid on
         box on
         axis equal
@@ -66,48 +66,16 @@ switch cameraMode
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                
             drawnow
-                        % Make gif
-%               frame = getframe(ax); 
-%               im = frame2im(frame); 
-%               [imind,cm] = rgb2ind(im,256); 
-% 
-%               % Write to the GIF File 
-%               if (i-1) == 1 
-%                   imwrite(imind,cm,'follow.gif','gif', 'Loopcount',inf); 
-%               else 
-%                   imwrite(imind,cm,'follow.gif','gif','WriteMode','append'); 
-%               end 
            end
     case 'stationary'
-           
-              
            view([45 45]);
            for i = 2:length(tspan)
            % pause(.01)
             hold on
             plot3(pos_i(i-1,1), pos_i(i-1,2), pos_i(i-1,3),'or','MarkerSize',2,'MarkerFaceColor','r');
-            
-            % Make gif
-              frame = getframe(ax); 
-              im = frame2im(frame); 
-              [imind,cm] = rgb2ind(im,256); 
-
-              % Write to the GIF File 
-              if (i-1) == 1 
-                  imwrite(imind,cm,'stationary.gif','gif', 'Loopcount',inf); 
-              else 
-                  imwrite(imind,cm,'stationary.gif','gif','WriteMode','append'); 
-              end 
+            drawnow
            end
-%            for i = 1:180
-%               view([45+i 45])
-%                               frame = getframe(ax); 
-%               im = frame2im(frame); 
-%               [imind,cm] = rgb2ind(im,256); 
-% 
-%                   imwrite(imind,cm,'stationary.gif','gif','WriteMode','append'); 
-% 
-%            end
+
 end
            
            
