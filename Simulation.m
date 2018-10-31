@@ -19,7 +19,7 @@ Fg_i = [0; 0; -g*rocket.m]; % force of gravity in the Inertial Frame
 states = zeros(1,13); % initialize state matrix
 
 initial_yaw   = 0.000001;
-initial_pitch = 0.0;
+initial_pitch = 0.3;
 initial_roll  = 0.0;
 states(7:10)  = quat_from_ypr(initial_yaw,initial_pitch,initial_roll); % Using ZYX for all rotations
 states(11:13) = [0.0 0.0 0.0];
@@ -29,7 +29,7 @@ t0       = 0.01;     % Initial Time
 tf       = 10;       % Final Time
 nip      = 2;        % Number of integration points
 nsteps   = 1000;     % Number of steps between t0 and tf ("resolution")
-!! should be 10x more than the 32 Hz minimum
+
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
 %% Define the initial state and time span arrays
@@ -62,7 +62,7 @@ for i = 1:nsteps
     currentFwind_y = Fy(index);
     
 %% Solve the ODE    
-    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(tNew,statesIC,rocket,...
+    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(statesIC,rocket,...
                                                                  netThrust_b,currentFwind_x,currentFwind_y,...
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,statesIC,options);
@@ -80,8 +80,8 @@ for i = 1:nsteps
     end
     
     % break if angle is > 35 degrees
-    [~, pitch, roll] = quat2angle(circshift(states(i,7:10),1));
-    if ((abs(pitch) > 0.611) || (abs(roll) > 0.611)) && (norm(states(i,4:6)) > 10)
+    [~, pitch, roll] = euler_from_q(statesIC(7:10));
+    if ((abs(pitch) > 0.611) || (abs(roll) > 0.611)) && (norm(states(i,4:6)) > 20)
         %clc;
         disp('Abort: pitch or roll exceeded 35 degrees!');
         break
@@ -104,10 +104,18 @@ plot(t,eulerAngles);
 %     totalThrust = totalThrust + motorCluster(i).thrust(1:length(t));
 % end
 % plot(t,totalThrust)
+%% Gauge Object
+close all
+G = uigauge('ninetydegree');
+G.Limits     = [0 states(end,3)];
+G.MajorTicks = [10:50:states(end,3)-10];
+G.MinorTicks = [10:25:states(end,3)-5];
+
+
 %% Animate the resulting state array
 figure
 whitebg([1 1 1]);
-close all;
+
 zoom = 20; % Distance from camera to the rocket (m)
-AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
+AnimateRocket(t,states,rocket,zoom,G,'follow'); % 'follow' or 'stationary'
      

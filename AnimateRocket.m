@@ -1,4 +1,4 @@
-function AnimateRocket(tspan,states,rocket,zoom,cameraMode)
+function AnimateRocket(tspan,states,rocket,zoom,G,cameraMode)
 
 %% Draw the rocket body
 radius = rocket.body_diam / 2;
@@ -66,6 +66,7 @@ switch cameraMode
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                
             drawnow
+            G.Value = pos_i(i-1,3);
            end
     case 'stationary'
            view([45 45]);
@@ -74,6 +75,7 @@ switch cameraMode
             hold on
             plot3(pos_i(i-1,1), pos_i(i-1,2), pos_i(i-1,3),'or','MarkerSize',2,'MarkerFaceColor','r');
             drawnow
+            G.Value = pos_i(i-1,3);
            end
 
 end

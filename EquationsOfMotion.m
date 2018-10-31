@@ -1,4 +1,4 @@
-function states_i_dot = EquationsOfMotion(t,states,rocket,thrust_b,Fx,Fy,Ffins)
+function states_i_dot = EquationsOfMotion(states,rocket,thrust_b,Fx,Fy,dFins)
 global aeroConstant Fg_i
 
 %% Define the quaternions
@@ -19,7 +19,7 @@ qScalarFirst = circshift(states(7:10),1);
     
     Cx_v       = rocket.Cla * (alpha);
     Cy_v       = rocket.Clb * (beta);
-    Cz_v       = .01*rocket.Cd0; % Estimating the drag to be directly opposite the nose
+    Cz_v       = 0.05*rocket.Cd0; % Estimating the drag to be directly opposite the nose
     C_v        = [-Cx_v; -Cy_v; -Cz_v];
     
     Fad_v      = aeroConstant*(speed^2).*C_v;
