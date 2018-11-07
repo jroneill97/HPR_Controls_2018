@@ -64,10 +64,14 @@ A(13,6)= Clda*C*0.25*(-u(1)-u(2)+u(3)+u(4))*rho*S*x(6)/Iz;
 
 B = zeros(13,4);
 
-
-
-
-
+B(11,2)=.25*Clda*Rho*S*x(6)^2*C/Ix;
+B(11,4)=.25*Clda*Rho*S*x(6)^2*C/Ix;
+B(12,1)=.25*Clda*Rho*S*x(6)^2*C/Iy;
+B(12,3)=.25*Clda*Rho*S*x(6)^2*C/Iy;
+B(13,1)=.125*Clda*Rho*S*x(6)^2*C/Iz;
+B(13,2)=.125*Clda*Rho*S*x(6)^2*C/Iz;
+B(13,3)=.125*Clda*Rho*S*x(6)^2*C/Iz;
+B(13,4)=.125*Clda*Rho*S*x(6)^2*C/Iz;
 
 
 
