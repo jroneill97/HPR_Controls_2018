@@ -47,8 +47,9 @@ set(gcf,'Renderer','opengl');
 pos_i    = states(:,1:3);
 
 % Euler axis angle (theta) and unit vector (u)
-theta = 2*acos(states(:,10));           % principal angle
-u     = states(:,7:9)./sin(theta/2);  % euler axis of rotation
+%% Assuming that the scalar q is the first index
+theta = 2*acos(states(:,7));           % principal angle
+u     = states(:,8:10)./sin(theta/2);  % euler axis of rotation
 %% Animate the rocket flight
 switch cameraMode
     case 'follow'

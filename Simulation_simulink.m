@@ -4,12 +4,14 @@ clc; clear all; close all;
 %% Define initial States
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.001;
+initial_yaw   = 0.1;
 initial_pitch = 0.0;
 initial_roll  = 0.0;
-states(7:10)  = quat_from_ypr(initial_yaw,initial_pitch,initial_roll); % Using ZYX for all rotations
-states(11:13) = [0.0 0.0 0.0];
-states(6)     = 0.5;
+states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
+% quaternion in which the scalar part is the first index
+states(11:13) = [0.0 0.3 0.0];
+states(6)     = 1;
+states(5)     = 0;
 x0 = states;
 %% Create the thrust Curve from the motorCluster structure
 load motorCluster
@@ -31,8 +33,19 @@ sim('EquationsOfMotion_simulink');
 
 %% Animate the results
 load rocket
-zoom = 20; % Distance from camera to the rocket (m)
+zoom = 50; % Distance from camera to the rocket (m)
 tout = simOut(:,1);
 simOut = simOut(:,2:14);
+[yaw, pitch, roll] = quat2angle(simOut(:,7:10));
+hold on
+plot(tout,yaw);
+title('yaw');
+figure
+plot(tout,pitch);
+title('pitch');
+figure
+plot(tout,roll);
+title('roll');
+figure
 tout(end)
 AnimateRocket(tout,simOut,rocket,zoom,'stationary'); 

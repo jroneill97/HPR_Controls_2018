@@ -5,9 +5,18 @@ function states_i_dot = EquationsOfMotion(states,rocket,thrust_b,fins)
 % Aerodynamic forces due to rocket body
     vel_i       = states(4:6);
     vel_b       = quaternion_I_to_B(q,vel_i);
-    speed       = norm(vel_i);
-    alpha       = atan2(vel_b(1),vel_b(3));
-    beta        = asin(vel_b(2)/speed);
+    speed       = norm(vel_b);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    z_b = quaternion_I_to_B(q,[0;0;1]);
+%     u = cross(vel_b,z_b)/norm(cross(vel_b,z_b));
+%     a = acos(dot(vel_b,z_b)/(norm(vel_b)*norm(z_b)));
+%     vel_q = [sin(a/2)*u(1), sin(a/2)*u(2), sin(a/2)*u(3), cos(a/2)];
+% 
+%     [a,b,c] = quat2angle(vel_q,'ZYX')
+      alpha       = atan2(vel_b(1),vel_b(3));
+      beta        = asin(vel_b(2)/speed);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Cx_v        = rocket.Cla * (alpha);
     Cy_v        = rocket.Clb * (beta);
     Cz_v        = 0.05*rocket.Cd0; % Estimating the drag to be directly opposite the nose
@@ -59,7 +68,8 @@ Mfins_i      = quaternion_B_to_I(q,Mfins_b);
     
 %% Net moments on the rocket body
     Mnet_i       = Mexternal_i + Mfins_i;
-    
+    Mnet_b       = quaternion_I_to_B(q,Mnet_i);
+    xyz_b        = quaternion_I_to_B(q,states(11:13));
 %% Omega Matrix and angular momentum to calculate qdot
     Omega       = [[0            states(13) -states(12) states(11)];
                    [-states(13)  0           states(11) states(12)];
@@ -70,48 +80,46 @@ Mfins_i      = quaternion_B_to_I(q,Mfins_b);
 %% Define states_i_dot as the solutions to the equations of motion
 posdot_i    = states(4:6);               % inertial frame velocity
 veldot_i    = Fnet_i / rocket.m;         % inertial frame acceleration
-qdot        = 0.5*Omega*q;    % time derivative of quaternions
-wdot        = ((Mnet_i-cross(states(11:13),H))' ./ (rocket.I))'; % angular acceleration
+q_shifted   = circshift(q,-1);           % need to move the scalar part back to the 4th index
+qdot        = circshift(0.5*Omega*q_shifted,1);   % time derivative of quaternions
+wdot        = ((Mnet_b-cross(states(11:13),H))' ./ (rocket.I))'; % angular acceleration
 
 %% Output term (dx)
 states_i_dot    = [posdot_i; veldot_i; qdot; wdot];
 
-%%
-%%
-%%
-%%
-%%
-%%
-%% Define all functions present here
-%% ----------------------------------------------------------------
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% end of Equations of Motion
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %% quaternion_I_to_B
 function B = quaternion_I_to_B(q,A)
 % Rotation from Body fixed to Inertial frame
-QiB = dcm_from_q(q);
-B = QiB*A;
+% QiB = dcm_from_q(circshift(q,-1)); %%%% Uncomment if not using Aerospace
+% B = QiB*A;                         %%%% Toolbox. Delete circshift too
+B = quatrotate(q',A')';
 end
 %% quaternion_B_to_I
 function I = quaternion_B_to_I(q,A)
 % Rotation from Body fixed to Inertial frame
-QbI = dcm_from_q(q);
-I = QbI'*A;
+% QbI = dcm_from_q(circshift(q,-1)); %%%% Uncomment if not using Aerospace
+% I = QbI'*A  ;                      %%%% Toolbox. Delete circshift too
+I = quatrotate(quatconj(q'),A')';
 end
 %% dcm_from_q
-function Q = dcm_from_q(q)
-% ~~~~~~~~~~~~~~~~~~~~~~~
-%{
-  This function calculates the direction cosine matrix
-  from the quaternion.
-
-  q - quaternion (where q(4) is the scalar part)
-  Q - direction cosine matrix
-%}
-
-q1 = q(1); q2 = q(2); q3 = q(3); q4 = q(4);
-
-Q = [q1^2-q2^2-q3^2+q4^2,      2*(q1*q2+q3*q4),       2*(q1*q3-q2*q4);
-         2*(q1*q2-q3*q4), -q1^2+q2^2-q3^2+q4^2,       2*(q2*q3+q1*q4);
-         2*(q1*q3+q2*q4),      2*(q2*q3-q1*q4),  -q1^2-q2^2+q3^2+q4^2 ];
-end %dcm_from_q
-% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% function Q = dcm_from_q(q)         %%%% Uncomment if not using Aerospace toolbox
+% % ~~~~~~~~~~~~~~~~~~~~~~~
+% %{
+%   This function calculates the direction cosine matrix
+%   from the quaternion.
+% 
+%   q - quaternion (where q(4) is the scalar part)
+%   Q - direction cosine matrix
+% %}
+% 
+% q1 = q(1); q2 = q(2); q3 = q(3); q4 = q(4);
+% 
+% Q = [q1^2-q2^2-q3^2+q4^2,      2*(q1*q2+q3*q4),       2*(q1*q3-q2*q4);
+%          2*(q1*q2-q3*q4), -q1^2+q2^2-q3^2+q4^2,       2*(q2*q3+q1*q4);
+%          2*(q1*q3+q2*q4),      2*(q2*q3-q1*q4),  -q1^2-q2^2+q3^2+q4^2 ];
+% end %dcm_from_q
+% % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 end

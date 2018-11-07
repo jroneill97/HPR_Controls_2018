@@ -14,12 +14,14 @@ load Fwind;
 %% --------- Define initial states, time span, and resolution here --------
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.01;
-initial_pitch = 0.01;
+initial_yaw   = 0.00001;
+initial_pitch = 0.0;
 initial_roll  = 0.0;
-states(7:10)  = quat_from_ypr(initial_yaw,initial_pitch,initial_roll); % Using ZYX for all rotations
-states(11:13) = [0.0 0.0 0.0];
-states(6)     = .1;
+states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
+% quaternion in which the scalar part is the first index
+states(11:13) = [0.0 0.0 10.0];
+states(6)     = 0.1;
+states(5)     = 1;
 
 t0       = 0.01;     % Initial Time
 tf       = 10;       % Final Time
@@ -76,7 +78,7 @@ for i = 1:nsteps
     end
     
     % break if angle is > 35 degrees
-    [~, pitch, roll] = euler_from_q(statesIC(7:10));
+    [yaw,pitch,roll] = quat2angle(states(i,7:10),'ZYX');
     if ((abs(pitch) > 0.611) || (abs(roll) > 0.611)) && (norm(states(i,4:6)) > 20)
         %clc;
         disp('Abort: pitch or roll exceeded 35 degrees!');
@@ -89,6 +91,7 @@ clearvars -except t states stepSize rocket motorCluster Fx Fy h
 figure
 whitebg([1 1 1]);
 
-zoom = 20; % Distance from camera to the rocket (m)
-AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
+zoom = 50; % Distance from camera to the rocket (m)
+% AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
+AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
      
