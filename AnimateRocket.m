@@ -1,4 +1,4 @@
-function AnimateRocket(tspan,states,rocket,zoom,G,cameraMode)
+function AnimateRocket(tspan,states,rocket,zoom,cameraMode)
 
 %% Draw the rocket body
 radius = rocket.body_diam / 2;
@@ -49,7 +49,6 @@ pos_i    = states(:,1:3);
 % Euler axis angle (theta) and unit vector (u)
 theta = 2*acos(states(:,10));           % principal angle
 u     = states(:,7:9)./sin(theta/2);  % euler axis of rotation
-
 %% Animate the rocket flight
 switch cameraMode
     case 'follow'
@@ -66,16 +65,17 @@ switch cameraMode
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                
             drawnow
-            G.Value = pos_i(i-1,3);
            end
     case 'stationary'
            view([45 45]);
+           tempH = linspace(0,pos_i(end,3));
+           hold on
+           plot3(0,0,tempH,'or','MarkerSize',0.5,'MarkerFaceColor','blue');
            for i = 2:length(tspan)
            % pause(.01)
             hold on
             plot3(pos_i(i-1,1), pos_i(i-1,2), pos_i(i-1,3),'or','MarkerSize',2,'MarkerFaceColor','r');
             drawnow
-            G.Value = pos_i(i-1,3);
            end
 
 end

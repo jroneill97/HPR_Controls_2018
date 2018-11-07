@@ -2,11 +2,7 @@ clc; clear all; close all;
 load rocket;
 load motorCluster;
 load Fwind;
-%% Define parameters used throughout the simulation
-global aeroConstant g Fg_i
-aeroConstant  = 0.5*(1.225)*rocket.area;
-g    = 9.8;
-Fg_i = [0; 0; -g*rocket.m]; % force of gravity in the Inertial Frame
+%% References
 % -----------------------------------------------
 % ---------- Reference for state array ---------- 
 % -----------------------------------------------
@@ -18,17 +14,17 @@ Fg_i = [0; 0; -g*rocket.m]; % force of gravity in the Inertial Frame
 %% --------- Define initial states, time span, and resolution here --------
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.000001;
-initial_pitch = 0.3;
+initial_yaw   = 0.01;
+initial_pitch = 0.01;
 initial_roll  = 0.0;
 states(7:10)  = quat_from_ypr(initial_yaw,initial_pitch,initial_roll); % Using ZYX for all rotations
 states(11:13) = [0.0 0.0 0.0];
-states(6)     = 0.1;
+states(6)     = .1;
 
 t0       = 0.01;     % Initial Time
 tf       = 10;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 1000;     % Number of steps between t0 and tf ("resolution")
+nsteps   = 500;     % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -51,7 +47,7 @@ for i = 1:nsteps
     
 %% Find the thrust at the current time
     [~,index] = min(abs(t2-tspan));
-    for j = 1:7
+    for j = 1:numMotors(2)
       thrust_b(j) = motorCluster(j).thrust(index);
     end   
     netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
@@ -63,7 +59,7 @@ for i = 1:nsteps
     
 %% Solve the ODE    
     [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(statesIC,rocket,...
-                                                                 netThrust_b,currentFwind_x,currentFwind_y,...
+                                                                 netThrust_b,...
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,statesIC,options);
     
@@ -89,33 +85,10 @@ for i = 1:nsteps
     disp(t2);
 end
 clearvars -except t states stepSize rocket motorCluster Fx Fy h
-%% Display some data
-figure
-[yaw, pitch, roll] = quat2angle(circshift(states(:,7:10),1));
-eulerAngles = [roll,pitch,yaw];
-plot(t,eulerAngles);
-% figure
-% plot(t,states(:,4:6));
-% figure
-% hold on
-% totalThrust = zeros(length(t),1);
-% for i = 1:7
-%     plot(t,motorCluster(i).thrust(1:length(t)));
-%     totalThrust = totalThrust + motorCluster(i).thrust(1:length(t));
-% end
-% plot(t,totalThrust)
-%% Gauge Object
-close all
-G = uigauge('ninetydegree');
-G.Limits     = [0 states(end,3)];
-G.MajorTicks = [10:50:states(end,3)-10];
-G.MinorTicks = [10:25:states(end,3)-5];
-
-
 %% Animate the resulting state array
 figure
 whitebg([1 1 1]);
 
 zoom = 20; % Distance from camera to the rocket (m)
-AnimateRocket(t,states,rocket,zoom,G,'follow'); % 'follow' or 'stationary'
+AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
      
