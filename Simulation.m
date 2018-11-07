@@ -19,7 +19,7 @@ initial_pitch = 0.0;
 initial_roll  = 0.0;
 states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
-states(11:13) = [0.0 0.0 10.0];
+states(11:13) = [0.0 0.0 0.0];
 states(6)     = 0.1;
 states(5)     = 1;
 
@@ -87,10 +87,8 @@ for i = 1:nsteps
     disp(t2);
 end
 clearvars -except t states stepSize rocket motorCluster Fx Fy h
-%% Animate the resulting state array
-figure
-whitebg([1 1 1]);
 
+%% Animate the resulting state array
 zoom = 50; % Distance from camera to the rocket (m)
 % AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
 AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'

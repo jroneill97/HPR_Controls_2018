@@ -10,11 +10,11 @@ radius = rocket.body_diam / 2;
 [x,   y,   z  ] = cylinder( 0.005       ,7);    % axis bars
 % Rocket body
 h(1) = surface(xc,yc , (rocket.noseL*zc+(rocket.L-rocket.noseL))        ,'FaceColor','white');
-h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - rocket.dcg(3))*za + rocket.dcg(3))  ,'FaceColor','white');
-h(3) = surface(xb,yb , (rocket.dcg(3)*zb)                                  ,'FaceColor','white');
+h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - (rocket.L - rocket.dcg(3)))*za + (rocket.L - rocket.dcg(3)))  ,'FaceColor','white');
+h(3) = surface(xb,yb , ((rocket.L - rocket.dcg(3))*zb)                                  ,'FaceColor','white');
 % Axis bars
-h(4) = surface(z ,x  , (y + rocket.dcg(3)) ,'FaceColor','blue' ,'EdgeColor','none');
-h(5) = surface(x ,z  , (y + rocket.dcg(3)) ,'FaceColor','green','EdgeColor','none');
+h(4) = surface(z ,x  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','blue' ,'EdgeColor','none');
+h(5) = surface(x ,z  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','green','EdgeColor','none');
 h(6) = surface(x ,y  , (z + rocket.L)   ,'FaceColor','red'  ,'EdgeColor','none');
 
 switch cameraMode
