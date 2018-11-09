@@ -16,13 +16,12 @@ h(3) = surface(xb,yb , ((rocket.L - rocket.dcg(3))*zb)                          
 h(4) = surface(z ,x  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','blue' ,'EdgeColor','none');
 h(5) = surface(x ,z  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','green','EdgeColor','none');
 h(6) = surface(x ,y  , (z + rocket.L)   ,'FaceColor','red'  ,'EdgeColor','none');
-
 switch cameraMode
     case 'follow'
         axis off
-        ax = axes('XLim',[min(states(:,1))-100 max(states(:,1))+100],...
-                  'YLim',[min(states(:,2))-100 max(states(:,2))+100],...
-                  'ZLim',[min(states(:,3))-100 max(states(:,3))+100]);
+        ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
+                  'YLim',[min(states(:,2))-10 max(states(:,2))+10],...
+                  'ZLim',[min(states(:,3))-10 max(states(:,3))+10]);
         grid on
         box on
         axis equal
@@ -53,18 +52,20 @@ u     = states(:,8:10)./sin(theta/2);  % euler axis of rotation
 %% Animate the rocket flight
 switch cameraMode
     case 'follow'
-           camproj perspective
+%            camproj perspective
            camlookat(h); % Set the initial camera view to the rocket
            view([45 45]);
+           hold on
            for i = 2:length(tspan)
-            pause(.01)
+            pause(.1)
             set(rocketBody,'Matrix',...
                makehgtform('translate',pos_i(i-1,:)'+rocket.dcg,...
                            'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
                            'translate',-(pos_i(i-1,:)'+rocket.dcg),...
                            'translate',pos_i(i-1,:)')); 
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
-                 camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);                
+                 camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);           
+                 plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3));
             drawnow
            end
     case 'stationary'

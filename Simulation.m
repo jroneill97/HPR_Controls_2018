@@ -1,4 +1,4 @@
-clc; clear all; close all;
+clc; clear all; %close all;
 load rocket;
 load motorCluster;
 load Fwind;
@@ -21,12 +21,12 @@ states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
 states(11:13) = [0.0 0.0 0.0];
 states(6)     = 0.1;
-states(5)     = 1;
+states(5)     = 0;
 
 t0       = 0.01;     % Initial Time
 tf       = 10;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 500;     % Number of steps between t0 and tf ("resolution")
+nsteps   = 500;      % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -37,7 +37,8 @@ statesIC = states';            % State array used inside the loop
 
 %% Re-map the thrust data to fit the time span array
 motorCluster = CreateThrustCurves(motorCluster,tspan);
-
+motorCluster(4).enable = 0;
+motorCluster(7).enable = 0;
 %% Solve the equations of motion
 numMotors      = size(motorCluster); % size is the number of rocket motors
 options = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
@@ -50,9 +51,10 @@ for i = 1:nsteps
 %% Find the thrust at the current time
     [~,index] = min(abs(t2-tspan));
     for j = 1:numMotors(2)
-      thrust_b(j) = motorCluster(j).thrust(index);
+      thrust_z(j) = motorCluster(j).enable * motorCluster(j).thrust(index); % Thrust in the inertial z axis. the Enable 
+                                                                            % component sets the thrust for that motor
+                                                                            % to zero if enable is set to 0.
     end   
-    netThrust_b   = [0;0;sum(thrust_b,2)]; % sum of all the thrusts from each motor
 
 %% Find the X and Y wind forces at the current altitude
     [~,index] = min(abs(states(3)-hArray)); % This does the same thing as the find() command
@@ -60,8 +62,8 @@ for i = 1:nsteps
     currentFwind_y = Fy(index);
     
 %% Solve the ODE    
-    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(statesIC,rocket,...
-                                                                 netThrust_b,...
+    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(statesIC,rocket,motorCluster,...
+                                                                 thrust_z,...
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,statesIC,options);
     
@@ -79,7 +81,7 @@ for i = 1:nsteps
     
     % break if angle is > 35 degrees
     [yaw,pitch,roll] = quat2angle(states(i,7:10),'ZYX');
-    if ((abs(pitch) > 0.611) || (abs(roll) > 0.611)) && (norm(states(i,4:6)) > 20)
+    if ((abs(pitch) > 0.8727) || (abs(roll) > 0.8727)) && (norm(states(i,4:6)) > 20)
         %clc;
         disp('Abort: pitch or roll exceeded 35 degrees!');
         break
@@ -89,7 +91,6 @@ end
 clearvars -except t states stepSize rocket motorCluster Fx Fy h
 
 %% Animate the resulting state array
-zoom = 50; % Distance from camera to the rocket (m)
-% AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'
-AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
+zoom = 100; % Distance from camera to the rocket (m)
+% AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
      
