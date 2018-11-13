@@ -1,7 +1,6 @@
-clc; clear all; %close all;
+clc; clear all; close all;
 load rocket;
 load motorCluster;
-load Fwind;
 %% References
 % -----------------------------------------------
 % ---------- Reference for state array ---------- 
@@ -23,7 +22,7 @@ states(11:13) = [0.0 0.0 0.0];
 states(6)     = 0.1;
 states(5)     = 0;
 
-t0       = 0.01;     % Initial Time
+t0       = 0;        % Initial Time
 tf       = 10;       % Final Time
 nip      = 2;        % Number of integration points
 nsteps   = 500;      % Number of steps between t0 and tf ("resolution")
@@ -33,15 +32,14 @@ t = t0;         % initialize t
 %% Define the initial state and time span arrays
 stepSize = tf/nsteps;
 tspan    = [t0:stepSize:tf]'; % Total time span
-statesIC = states';            % State array used inside the loop
+currentStates = states';            % State array used inside the loop
 
 %% Re-map the thrust data to fit the time span array
 motorCluster = CreateThrustCurves(motorCluster,tspan);
-motorCluster(4).enable = 0;
-motorCluster(7).enable = 0;
+
 %% Solve the equations of motion
 numMotors      = size(motorCluster); % size is the number of rocket motors
-options = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
+options        = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
 
 for i = 1:nsteps 
     t1 = stepSize*(i-1);
@@ -51,25 +49,19 @@ for i = 1:nsteps
 %% Find the thrust at the current time
     [~,index] = min(abs(t2-tspan));
     for j = 1:numMotors(2)
-      thrust_z(j) = motorCluster(j).enable * motorCluster(j).thrust(index); % Thrust in the inertial z axis. the Enable 
+      currentThrust(j) = motorCluster(j).enable * motorCluster(j).thrust(index); % Thrust in the inertial z axis. the Enable 
                                                                             % component sets the thrust for that motor
                                                                             % to zero if enable is set to 0.
     end   
-
-%% Find the X and Y wind forces at the current altitude
-    [~,index] = min(abs(states(3)-hArray)); % This does the same thing as the find() command
-    currentFwind_x = Fx(index);
-    currentFwind_y = Fy(index);
-    
 %% Solve the ODE    
-    [tNew,tempStates] = ode45(@(tNew,statesIC) EquationsOfMotion(statesIC,rocket,motorCluster,...
-                                                                 thrust_z,...
+    [tNew,tempStates] = ode45(@(tNew,currentStates) EquationsOfMotion(currentStates,rocket,motorCluster,...
+                                                                 currentThrust,...
                                                                  [0;0;0;0]),...
-                                                                 temp_tspan,statesIC,options);
+                                                                 temp_tspan,currentStates,options);
     
     t(i) = t2;
-    statesIC = tempStates(nip+1,1:13)';
-    states(i,:) = statesIC';
+    currentStates = tempStates(nip+1,1:13)';
+    states(i,:) = currentStates';
     
 %% Break conditions
     % break if apogee is reached
@@ -79,7 +71,7 @@ for i = 1:nsteps
         break
     end
     
-    % break if angle is > 35 degrees
+    % break if angle is > 50 degrees
     [yaw,pitch,roll] = quat2angle(states(i,7:10),'ZYX');
     if ((abs(pitch) > 0.8727) || (abs(roll) > 0.8727)) && (norm(states(i,4:6)) > 20)
         %clc;
@@ -92,5 +84,5 @@ clearvars -except t states stepSize rocket motorCluster Fx Fy h
 
 %% Animate the resulting state array
 zoom = 100; % Distance from camera to the rocket (m)
-% AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
-     
+hold on
+AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'

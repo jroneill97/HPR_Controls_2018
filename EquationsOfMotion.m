@@ -17,11 +17,11 @@ function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,fins
       alpha       = atan2(vel_b(1),vel_b(3));
       beta        = asin(vel_b(2)/speed);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Cx_v        = rocket.Cla * (alpha);
-    Cy_v        = rocket.Clb * (beta);
-    Cz_v        = 0.05*rocket.Cd0; % Estimating the drag to be directly opposite the nose
+    Cx_v        = rocket.Cla * (alpha) * rocket.area;
+    Cy_v        = rocket.Clb * (beta)  * rocket.area;
+    Cz_v        = rocket.Cd0 * rocket.area; % Estimating the drag to be directly opposite the nose
     C_v         = [-Cx_v; -Cy_v; -Cz_v];
-    Fad_v       = 0.5*(1.225)*rocket.area*(speed^2).*C_v;
+    Fad_v       = 0.5*(1.225)*(speed^2).*C_v;
     Rvel2body   = (R2(-alpha)*R3(beta))';
     Fad_b       = Rvel2body *Fad_v;
 Fad_i       = quaternion_B_to_I(q,Fad_b);
@@ -41,7 +41,6 @@ Fnet_i      = Fexternal_i + Tnet_i;
 % Rotate the distance from CP to CG into the inertial frame
     cp2cg_b     = rocket.dcg-rocket.dcp;
     cp2cg_i     = quaternion_B_to_I(q,cp2cg_b); % distance from the cp to cg in inertial frame  
-
 % Moment due to aerodynamic force of rocket body
 Mad_i       = cross(cp2cg_i,Fad_i);
 % Net External Moments
@@ -63,10 +62,10 @@ Mmotors_net_i = quaternion_B_to_I(q,Mmotors_net_b);
     r3_b         = [-finLatOffset; 0;            finCGOffset];
     r4_b         = [0;            -finLatOffset; finCGOffset];
 % Fin forces
-    F1_b         = [0       ; fins(1) ;0];
-    F2_b         = [-fins(2); 0       ;0];
-    F3_b         = [0       ; -fins(3);0];
-    F4_b         = [fins(4) ; 0       ;0];
+    F1_b         = [0       ; fins(1) ; 0];
+    F2_b         = [-fins(2); 0       ; 0];
+    F3_b         = [0       ; -fins(3); 0];
+    F4_b         = [fins(4) ; 0       ; 0];
 % body-fixed moments due to the flippers
     M1_b         = cross(r1_b,F1_b);
     M2_b         = cross(r2_b,F2_b);
@@ -78,8 +77,8 @@ Mfins_i      = quaternion_B_to_I(q,Mfins_b);
     
 %% Net moments on the rocket body
     Mnet_i       = Mexternal_i + Mfins_i + Mmotors_net_i;
-Mnet_b       = quaternion_I_to_B(q,Mnet_i);
-    xyz_b        = quaternion_I_to_B(q,states(11:13));
+    Mnet_b       = quaternion_I_to_B(q,Mnet_i);
+    w_b          = quaternion_I_to_B(q,states(11:13));
 %% Omega Matrix and angular momentum to calculate qdot
     Omega       = [[0            states(13) -states(12) states(11)];
                    [-states(13)  0           states(11) states(12)];
@@ -92,7 +91,7 @@ posdot_i    = states(4:6);               % inertial frame velocity
 veldot_i    = Fnet_i / rocket.m;         % inertial frame acceleration
 q_shifted   = circshift(q,-1);           % need to move the scalar part back to the 4th index
 qdot        = circshift(0.5*Omega*q_shifted,1);   % time derivative of quaternions
-wdot        = ((Mnet_i-cross(states(11:13),H))' ./ (rocket.I))'; % angular acceleration
+wdot        = ((Mnet_b-cross(w_b,H))' ./ (rocket.I))'; % angular acceleration
 
 %% Output term (dx)
 states_i_dot    = [posdot_i; veldot_i; qdot; wdot];
