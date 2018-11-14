@@ -77,6 +77,9 @@ switch cameraMode
            % pause(.01)
             hold on
             plot3(pos_i(i-1,1), pos_i(i-1,2), pos_i(i-1,3),'or','MarkerSize',2,'MarkerFaceColor','r');
+            xlabel('X');
+            ylabel('Y');
+            zlabel('Z');
             drawnow
            end
 

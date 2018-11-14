@@ -13,19 +13,20 @@ load motorCluster;
 %% --------- Define initial states, time span, and resolution here --------
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.00001;
+initial_yaw   = 0.0;
 initial_pitch = 0.0;
 initial_roll  = 0.0;
 states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
 states(11:13) = [0.0 0.0 0.0];
-states(6)     = 0.1;
-states(5)     = 0;
+states(6)     = 0.0001;
+states(5)     = 5;
+states(4)     = 5;
 
 t0       = 0;        % Initial Time
-tf       = 10;       % Final Time
+tf       = 50;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 500;      % Number of steps between t0 and tf ("resolution")
+nsteps   = 1000;      % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -72,17 +73,17 @@ for i = 1:nsteps
     end
     
     % break if angle is > 50 degrees
-    [yaw,pitch,roll] = quat2angle(states(i,7:10),'ZYX');
-    if ((abs(pitch) > 0.8727) || (abs(roll) > 0.8727)) && (norm(states(i,4:6)) > 20)
+    [yaw(i),pitch(i),roll(i)] = quat2angle(states(i,7:10),'ZYX');
+    if ((abs(pitch(i)) > 0.8727) || (abs(roll(i)) > 0.8727)) && (norm(states(i,4:6)) > 20)
         %clc;
-        disp('Abort: pitch or roll exceeded 35 degrees!');
+        disp('Abort: pitch or roll exceeded 50 degrees!');
         break
     end
     disp(t2);
 end
-clearvars -except t states stepSize rocket motorCluster Fx Fy h
+clearvars -except t states stepSize rocket motorCluster yaw pitch roll
 
 %% Animate the resulting state array
-zoom = 100; % Distance from camera to the rocket (m)
-hold on
-AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
+zoom = 200; % Distance from camera to the rocket (m)
+
+AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
