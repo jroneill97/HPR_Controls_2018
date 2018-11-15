@@ -11,13 +11,11 @@ function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,fins
     
     Cx_v        = rocket.Cla * (alpha) * rocket.area;
     Cy_v        = rocket.Clb * (beta)  * rocket.area;
-    Cz_v        = rocket.Cd0 * rocket.area; % Estimating the drag to be directly opposite the nose
+    Cz_v        = rocket.Cd            * rocket.frontArea; % Estimating the drag to be directly opposite the nose
     C_v         = [Cx_v; Cy_v; -Cz_v];
     Fad_v       = 0.5*(1.225)*(speed^2).*C_v;
     q_v         = angle2quat(0,-alpha,beta);
     Fad_b_quat  = quatrotate(quatconj(q_v),Fad_v')';
-%     Rvel2body   = (R2(-alpha)*R3(beta))';
-%     Fad_b       = Rvel2body *Fad_v;
 Fad_i       = quaternion_B_to_I(q,Fad_b_quat);
     
 Fg_i        = [0;0;-9.8*rocket.m];

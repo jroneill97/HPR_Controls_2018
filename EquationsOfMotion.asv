@@ -6,27 +6,17 @@ function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,fins
     vel_i       = states(4:6);
     vel_b       = quaternion_I_to_B(q,vel_i);
     speed       = norm(vel_b);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%    z_b = quaternion_I_to_B(q,[0;0;1]);
-%     u = cross(vel_b,z_b)/norm(cross(vel_b,z_b));
-%     a = acos(dot(vel_b,z_b)/(norm(vel_b)*norm(z_b)));
-%     vel_q = [sin(a/2)*u(1), sin(a/2)*u(2), sin(a/2)*u(3), cos(a/2)];
-% 
-%     [a,b,c] = quat2angle(vel_q,'ZYX')
-      alpha       = -atan2(vel_b(1),vel_b(3));
-      beta        = -asin(vel_b(2)/speed);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Cx_v        = alpha; %rocket.Cla * (alpha) * rocket.area;
-    Cy_v        = beta; %rocket.Clb * (beta)  * rocket.area;
-    Cz_v        = 1;%rocket.Cd0 * rocket.area; % Estimating the drag to be directly opposite the nose
+    alpha       = -atan2(vel_b(1),vel_b(3)); % Angle of attack
+    beta        = -asin(vel_b(2)/speed);     % Side-slip
+    
+    Cx_v        = rocket.Cla * (alpha) * rocket.area;
+    Cy_v        = rocket.Clb * (beta)  * rocket.area;
+    Cz_v        = rocket.Cd  *          rocket.frontArea; % Estimating the drag to be directly opposite the nose
     C_v         = [Cx_v; Cy_v; -Cz_v];
-    Fad_v       = C_v %0.5*(1.225)*(speed^2).*C_v;
-    q_v         = angle2quat(0,-alpha,beta,'zyx');
-    Fad_b_quat  = quatrotate(q_v,Fad_v')'
-%     Rvel2body   = (R2(-alpha)*R3(beta))';
-%     Fad_b       = Rvel2body *Fad_v;
-Fad_i       = quaternion_B_to_I(q,Fad_b_quat)
+    Fad_v       = 0.5*(1.225)*(speed^2).*C_v;
+    q_v         = angle2quat(0,-alpha,beta);
+    Fad_b_quat  = quatrotate(quatconj(q_v),Fad_v')';
+Fad_i       = quaternion_B_to_I(q,Fad_b_quat);
     
 Fg_i        = [0;0;-9.8*rocket.m];
     

@@ -20,8 +20,8 @@ states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
 states(11:13) = [0.0 0.0 0.0];
 states(6)     = 0.0001;
-states(5)     = 5;
-states(4)     = 5;
+states(5)     = 0.0;
+states(4)     = 0.0;
 
 t0       = 0;        % Initial Time
 tf       = 50;       % Final Time
@@ -37,7 +37,9 @@ currentStates = states';            % State array used inside the loop
 
 %% Re-map the thrust data to fit the time span array
 motorCluster = CreateThrustCurves(motorCluster,tspan);
-
+for i = 1:7
+    motorCluster(i).enable = 1;
+end
 %% Solve the equations of motion
 numMotors      = size(motorCluster); % size is the number of rocket motors
 options        = odeset('JConstant','on', 'RelTol',1e-6, 'AbsTol',1e-6);
@@ -54,6 +56,7 @@ for i = 1:nsteps
                                                                             % component sets the thrust for that motor
                                                                             % to zero if enable is set to 0.
     end   
+
 %% Solve the ODE    
     [tNew,tempStates] = ode45(@(tNew,currentStates) EquationsOfMotion(currentStates,rocket,motorCluster,...
                                                                  currentThrust,...
@@ -86,4 +89,4 @@ clearvars -except t states stepSize rocket motorCluster yaw pitch roll
 %% Animate the resulting state array
 zoom = 200; % Distance from camera to the rocket (m)
 
-AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
+AnimateRocket(t,states,rocket,zoom,'stationary'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
