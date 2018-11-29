@@ -32,6 +32,13 @@ switch cameraMode
                   'ZLim',[0                    max(states(:,3))+10]);
         grid on
         box on
+    case 'plot'
+        axis off
+        ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
+                  'YLim',[min(states(:,2))-10 max(states(:,2))+10],...
+                  'ZLim',[0                    max(states(:,3))+10]);
+        grid on
+        box on
 
         %axis equal
 end
@@ -82,8 +89,16 @@ switch cameraMode
             zlabel('Z');
             drawnow
            end
-
+    case 'plot'
+        view([45 45]);
+        hold on
+        plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3),'MarkerSize',1);
+            xlabel('X');
+            ylabel('Y');
+            zlabel('Z');
 end
+
+
            
            
            

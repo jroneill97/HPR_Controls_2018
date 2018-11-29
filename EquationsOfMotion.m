@@ -1,26 +1,40 @@
-function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,fins)
+function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,windSpeed,fins)
 %% Define the quaternions
     q           = states(7:10);
 %% External Forces (inertial frame)
-% Aerodynamic forces due to rocket body
+% Aerodynamic forces on rocket body
     vel_i       = states(4:6);
     vel_b       = quaternion_I_to_B(q,vel_i);
     speed       = norm(vel_b);
     alpha       = -atan2(vel_b(1),vel_b(3)); % Angle of attack
     beta        = -asin(vel_b(2)/speed);     % Side-slip
     
-    Cx_v        = rocket.Cla * (alpha) * rocket.area;
-    Cy_v        = rocket.Clb * (beta)  * rocket.area;
-    Cz_v        = rocket.Cd            * rocket.frontArea; % Estimating the drag to be directly opposite the nose
+    Cx_v        = rocket.Cla * sin(alpha) * rocket.area;
+    Cy_v        = rocket.Clb * sin(beta)  * rocket.area;
+    Cz_v        = rocket.Cd  * rocket.frontArea; % Estimating the drag to be directly opposite the nose
     C_v         = [Cx_v; Cy_v; -Cz_v];
     Fad_v       = 0.5*(1.225)*(speed^2).*C_v;
     q_v         = angle2quat(0,-alpha,beta);
     Fad_b_quat  = quatrotate(quatconj(q_v),Fad_v')';
-Fad_i       = quaternion_B_to_I(q,Fad_b_quat);
+Fad_i           = quaternion_B_to_I(q,Fad_b_quat);
     
-Fg_i        = [0;0;-9.8*rocket.m];
-    
-Fexternal_i = Fg_i +Fad_i;
+Fg_i            = [0;0;-9.8*rocket.m];
+   
+%% Wind Force
+%     windVel_b   = quaternion_I_to_B(q,[windSpeed;0;0]);
+%     alpha_wind  = -atan2(windVel_b(1),windVel_b(3)); % Angle of attack
+%     beta_wind   = -asin(windVel_b(2)/windSpeed);     % Side-slip
+%     
+%     Fx_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cla * rocket.area * sin(alpha_wind);
+%     Fy_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Clb * rocket.area * sin(beta_wind);
+%     Fz_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cd * rocket.frontArea;
+%     Fwind_v        = [Fx_wind; Fy_wind; Fz_wind];
+%     q_v            = angle2quat(0,-alpha_wind,beta_wind);
+%     Fwind_b_quat   = quatrotate(quatconj(q_v),Fwind_v')';
+Fwind_i            = [0.5*1.225*(windSpeed^2)*rocket.Cla; 0; 0];
+%% External force
+Fexternal_i     = Fg_i + Fad_i + Fwind_i;
+
 %% Thrust force
     [~, motorCount] = size(motorCluster);
     Tmotors     = [zeros(2,motorCount);thrust]; % Creates a column vector for each motor    
@@ -79,7 +93,7 @@ Mfins_i      = quaternion_B_to_I(q,Mfins_b);
     H           =  (rocket.I)'.*states(11:13);                   % angular momentum
 
 %% Define states_i_dot as the solutions to the equations of motion
-posdot_i    = states(4:6);               % inertial frame velocity
+posdot_i    = vel_i;                  % inertial frame velocity
 veldot_i    = Fnet_i / rocket.m;         % inertial frame acceleration
 q_shifted   = circshift(q,-1);           % need to move the scalar part back to the 4th index
 qdot        = circshift(0.5*Omega*q_shifted,1);   % time derivative of quaternions

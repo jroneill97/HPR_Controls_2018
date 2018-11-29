@@ -29,9 +29,9 @@ states(5)     = 0.0;
 states(4)     = 0.0;
 
 t0       = 0;        % Initial Time
-tf       = 300;       % Final Time
+tf       = 70;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 10000;      % Number of steps between t0 and tf ("resolution")
+nsteps   = 1000;      % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -63,7 +63,7 @@ for i = 1:nsteps
     end   
 %% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
-      currentWindVel = (multiplier-1)*wind.velocity(index);
+      currentWindVel = multiplier*wind.velocity(index);
 
 %% Solve the ODE    
 

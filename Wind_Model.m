@@ -1,11 +1,11 @@
-
+load rocket
 var=3;
 v_avg=6;
 k=.002;
 ap=.6126;
 ct=.15;
-A=.1290;
-D=.0508;
+A=rocket.area;
+D=0.0508;
 
 h=[1:1500];
 noise=sqrt(var)*rand(h(end),1); %create white noise with given variance
