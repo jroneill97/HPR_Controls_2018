@@ -1,5 +1,6 @@
 load wind;
-for i = 1:11
+clear windSpeedAvg;
+for i = 1:10
     windSpeedAvg(i) = mean((i-1)*wind.velocity);
 end
 plot(windSpeedAvg,radius);

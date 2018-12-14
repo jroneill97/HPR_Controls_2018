@@ -1,5 +1,3 @@
-radius = zeros(1,10);
-for multiplier = 1:11
 clc; clearvars -except multiplier radius; close all;
 load rocket;
 load motorCluster;
@@ -31,7 +29,7 @@ states(4)     = 0.0;
 t0       = 0;        % Initial Time
 tf       = 300;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 10000;      % Number of steps between t0 and tf ("resolution")
+nsteps   = 1000;      % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -61,9 +59,14 @@ for i = 1:nsteps
                                                                             % component sets the thrust for that motor
                                                                             % to zero if enable is set to 0.
     end   
+    motorCluster(1).enable = 0;
+    motorCluster(2).enable = 0;
+    motorCluster(3).enable = 0;
+    motorCluster(4).enable = 0;
+    
 %% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
-      currentWindVel = (multiplier-1)*wind.velocity(index);
+      currentWindVel = wind.velocity(index);
 
 %% Solve the ODE    
 
@@ -108,15 +111,14 @@ end
     end
     if (parachuteDeployed == true) && (states(i,3) <= 0)
         fprintf("Rocket has landed %0.0f meters away from launch site at %0.1f m/s\n",norm(states(i,1:2)),states(i,6));
-        radius(multiplier) = norm(states(i,1:2))
+        %radius(multiplier) = norm(states(i,1:2))
         break;
     end
     fprintf("time = %0.1f\n",t2);
 end
 clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius
 %% Animate the resulting state array
-% zoom = 200; % Distance from camera to the rocket (m)
-% 
-% AnimateRocket(t,states,rocket,zoom,'plot'); % 'follow' or 'stationary'AnimateRocket(t,states,rocket,zoom,'follow'); % 'follow' or 'stationary'
-% fprintf("Animation Complete \n");
-end
+zoom = 10; % Distance from camera to the rocket (m)
+
+AnimateRocket(t,states,rocket,zoom,'follow'); % 'plot', 'follow', 'stationary'
+fprintf("Animation Complete \n");
