@@ -22,11 +22,23 @@ clc; clear all; close all;
 % disp(J_x);
 
 %% 
+syms u v w
 
-% DCM for velocity fixed to body fixed frame of reference
-RvB = [[      1/(v^2/w^2 + 1)^(1/2), -v^2/(w*(v^2/w^2 + 1)^(1/2)*(u^2 + v^2 + w^2)^(1/2)), (v*(1 - v^2/(u^2 + v^2 + w^2))^(1/2))/(w*(v^2/w^2 + 1)^(1/2))];
-       [                          0,                    (1 - v^2/(u^2 + v^2 + w^2))^(1/2),                                     v/(u^2 + v^2 + w^2)^(1/2)];
-       [ -v/(w*(v^2/w^2 + 1)^(1/2)),     -v/((v^2/w^2 + 1)^(1/2)*(u^2 + v^2 + w^2)^(1/2)),         (1 - v^2/(u^2 + v^2 + w^2))^(1/2)/(v^2/w^2 + 1)^(1/2)]];
+alpha = -atan2(v,w);
+beta  = -asin(v/sqrt(u^2+v^2+w^2));
+
+RbV = [[            cos(alpha),          0,           sin(alpha)];
+       [ -sin(alpha)*sin(beta),  cos(beta), cos(alpha)*sin(beta)];
+       [ -cos(beta)*sin(alpha), -sin(beta), cos(alpha)*cos(beta)]];
+RvB = RbV';
+
+alpha = v/w;
+beta  = v/sqrt(v^2+u^2+w^2)
+
+RvB = [[(sqrt(1+alpha^2))^-1,   (-beta*alpha)/sqrt(1+alpha^2),   -sqrt(1-beta^2)*];
+       [];
+       []];
+
 
 
 

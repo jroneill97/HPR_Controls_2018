@@ -49,8 +49,6 @@ Fnet_i      = Fexternal_i + Tnet_i;
     cp2cg_i     = quaternion_B_to_I(q,cp2cg_b); % distance from the cp to cg in inertial frame  
 % Moment due to aerodynamic force of rocket body
 Mad_i       = cross(cp2cg_i,Fad_i);
-% Net External Moments
-Mexternal_i = Mad_i;
 
 %% Moments due to rocket motors
     thrustCGOffset  = rocket.L; % Motor offset from the CG
@@ -82,9 +80,9 @@ Mmotors_net_i = quaternion_B_to_I(q,Mmotors_net_b);
 Mfins_i      = quaternion_B_to_I(q,Mfins_b);
     
 %% Net moments on the rocket body
-    Mnet_i       = Mexternal_i + Mfins_i + Mmotors_net_i;
-    Mnet_b       = quaternion_I_to_B(q,Mnet_i);
-    w_b          = quaternion_I_to_B(q,states(11:13));
+    Mnet_i       = Mad_i + Mfins_i + Mmotors_net_i;    
+    Mnet_b       = quaternion_I_to_B(q,Mnet_i);        % Body-fixed net moments
+    w_b          = quaternion_I_to_B(q,states(11:13)); % Body-fixed angular velocity
 %% Omega Matrix and angular momentum to calculate qdot
     Omega       = [[0            states(13) -states(12) states(11)];
                    [-states(13)  0           states(11) states(12)];
@@ -97,7 +95,7 @@ posdot_i    = vel_i;                  % inertial frame velocity
 veldot_i    = Fnet_i / rocket.m;         % inertial frame acceleration
 q_shifted   = circshift(q,-1);           % need to move the scalar part back to the 4th index
 qdot        = circshift(0.5*Omega*q_shifted,1);   % time derivative of quaternions
-wdot        = ((Mnet_b-cross(w_b,H))' ./ (rocket.I))'; % angular acceleration
+wdot        = ((Mnet_i-cross(states(11:13),H))' ./ (rocket.I))'; % angular acceleration
 
 %% Output term (dx)
 states_i_dot    = [posdot_i; veldot_i; qdot; wdot];
@@ -107,16 +105,12 @@ states_i_dot    = [posdot_i; veldot_i; qdot; wdot];
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %% quaternion_I_to_B
 function B = quaternion_I_to_B(q,A)
-% Rotation from Body fixed to Inertial frame
-% QiB = dcm_from_q(circshift(q,-1)); %%%% Uncomment if not using Aerospace
-% B = QiB*A;                         %%%% Toolbox. Delete circshift too
+% Rotation from Inertial fixed to Body frame
 B = quatrotate(q',A')';
 end
 %% quaternion_B_to_I
 function I = quaternion_B_to_I(q,A)
 % Rotation from Body fixed to Inertial frame
-% QbI = dcm_from_q(circshift(q,-1)); %%%% Uncomment if not using Aerospace
-% I = QbI'*A  ;                      %%%% Toolbox. Delete circshift too
 I = quatrotate(quatconj(q'),A')';
 end
 end
