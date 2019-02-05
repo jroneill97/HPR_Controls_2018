@@ -16,13 +16,13 @@ load wind;
 parachuteDeployed = false;
 states = zeros(1,13); % initialize state matrix
 
-initial_yaw   = 0.00001;
+initial_yaw   = 0.0;
 initial_pitch = 0.0;
 initial_roll  = 0.0;
 states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
 states(11:13) = [0.0 0.0 0.0];
-states(6)     = 0.0001;
+states(6)     = 0.000001;
 states(5)     = 0.0;
 states(4)     = 0.0;
 
@@ -120,5 +120,5 @@ clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius
 %% Animate the resulting state array
 zoom = 10; % Distance from camera to the rocket (m)
 
-AnimateRocket(t,states,rocket,zoom,'follow'); % 'plot', 'follow', 'stationary'
+AnimateRocket(t,states,rocket,zoom,'plot'); % 'plot', 'follow', 'stationary'
 fprintf("Animation Complete \n");

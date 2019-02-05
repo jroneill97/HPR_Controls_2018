@@ -45,7 +45,7 @@ Fnet_i      = Fexternal_i + Tnet_i;
 
 %% External Moments (inertial frame)
 % Rotate the distance from CP to CG into the inertial frame
-    cp2cg_b     = rocket.dcg-rocket.dcp;
+    cp2cg_b     = rocket.dcp-rocket.dcg;
     cp2cg_i     = quaternion_B_to_I(q,cp2cg_b); % distance from the cp to cg in inertial frame  
 % Moment due to aerodynamic force of rocket body
 Mad_i       = cross(cp2cg_i,Fad_i);
