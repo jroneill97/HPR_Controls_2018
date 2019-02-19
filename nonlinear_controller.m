@@ -1,87 +1,40 @@
-%% MQP work for Rocket Controller
-clc; clear all; close all;
-
-% syms x y z u v w T m g rho Cl Cd A_side A_fin A_front q1 q2 q3 q4 wx wy wz Mx My Mz Ixx Iyy Izz d l dcg dcp u1 u2 u3 u4
-% % define matrix groups
-% q = [q1; q2; q3; q4];
-% w0 = [wx ;wy; wz];
-% speed = (u^2+v^2+w^2)^2;
-% 
-% f1 = 0.5*rho*A_fin*u1*speed^2;
-% f2 = 0.5*rho*A_fin*u2*speed^2;
-% f3 = 0.5*rho*A_fin*u3*speed^2;
-% f4 = 0.5*rho*A_fin*u4*speed^2;
-% 
-% M_fins_b = [l*(f3-f1) l*(f4-f2) d*(f1+f2+f3+f4)];
-% 
-% % M_fins=[[l*(f2-f4)*(2*q1*q4-2*q2*q3)+d*(2*q1*q3+2*q2*q4)*(f1+f2+f3+f4)-l*(f1-f3)*(q1^2+q2^2-q3^2-q4^2)] ...
-% %  [- l*(f1-f3)*(2*q1*q4+2*q2*q3)-d*(2*q1*q2-2*q3*q4)*(f1+f2+f3+f4)- l*(f2 - f4)*(q1^2 - q2^2 + q3^2 - q4^2)] ...
-% %  [  d*(q1^2 - q2^2 - q3^2 + q4^2)*(f1 + f2 + f3 + f4) + l*(f1 - f3)*(2*q1*q3 - 2*q2*q4) - l*(f2 - f4)*(2*q1*q2 + 2*q3*q4)]];
-% I = [Ixx 0 0; 0 Iyy 0; 0 0 Izz];
-% H = [Ixx*wx; Iyy*wy; Izz*wz];
-% 
-% % define matrix helper formulas
-% % w_x = [0 -wz wy; wz 0 -wx; -wy wx 0];
-% % O = [-w_x w0; -w0' 0];
-% OMEGA       = [[0            wz -wy wx];
-%                [-wz  0           wx wy];
-%                [ wy -wx  0          wz];
-%                [-wx -wy -wz 0         ]];
-% q_dot = 0.5*OMEGA*q;
-% 
-% 
-% %Aerodynamic Force/Moment
-% a = -atan(v/w);
-% b = asin(v/sqrt(speed));
-% T_bi = [2*(q2*q4+q1*q3)*T; 2*(q3*q4-q1*q2)*T; (q1^2-q2^2-q3^2+q4^2)*T];
-% F_ad = [0.5*rho*speed*Cl*A_side*((v/w)/sqrt((v^2/w)+1))*2*pi*atan(v/w);...
-%         0.5*rho*speed*Cl*A_side*(v/speed)*2*pi*atan(v/w);...
-%         0.5*rho*speed^2*Cd*A_front]';
-% %DCM for velocity fixed to body fixed frame of reference
-% R_vb(1,:) = [1/sqrt(v^2/w^2+1) -v^2/(w*sqrt(v^2/w^2+1)*sqrt(speed))...
-%             v*(1-(v^2/sqrt(speed)))/(w*sqrt(v^2/w^2+1))];
-% R_vb(2,:) = [0 sqrt(1-v^2/speed) v/sqrt(speed)];...
-% R_vb(3,:) = [-v/(w*sqrt(v^2/w^2 + 1)) -v/(sqrt(v^2/w^2 + 1)*sqrt(speed))...
-%             (1-v^2/sqrt(speed))/sqrt(v^2/w^2 + 1)];
-% R_bi = [q1^2-q2^2-q3^2+q4^2 2*(q1*q2+q3*q4) 2*(q1*q3-q2*q4);...
-%         2*(q2*q1-q3*q4) -q1^2+q2^2-q3^2+q4^2 2*(q2*q3+q1*q4);...
-%         2*(q3*q1+q2*q4) 2*(q3*q2-q1*q4) -q1^2-q2^2+q3^2+q4^2];
-% F_aero = F_ad*R_vb*R_bi;
-% F = T_bi+[0;0;-m*g]+[F_aero(1); F_aero(2); F_aero(3)];
-% 
-% % Rotate the distance from CP to CG into the inertial frame
-% cp_vector = [0 0 dcp];
-% cg_vector = [0 0 dcg];
-% 
-% cp2cg_b     = cp_vector-cg_vector;
-% cp2cg_i     = cp2cg_b*R_bi; % distance from the cp to cg in inertial frame  
-% 
-% % Moment due to aerodynamic force of rocket body
-% M_fins_i = M_fins_b*R_bi;
-% M_aero   = cross(F_aero, cp2cg_i);
-% 
-% M=M_fins_i+M_aero;
-% w_dot = I\(M'-cross(w0,H));
-% %disp(F);
-% 
-% x_dot = [u; v; w; F(1)/m; F(2)/m; F(3)/m; q_dot; w_dot]; %13x1 column vector
-% %disp(x_dot);
-% 
-% vars = [x; y; z; u; v; w; q1; q2; q3; q4; wx; wy; wz];
-% A = jacobian(x_dot,vars); %13x13 matrix
-% B = [zeros(11,4);jacobian(M_fins_i,[u1,u2,u3,u4])];
-% C = [0 0 1 0 0 0 0 0 0 0 0 0 0;...
-%     0 0 0 0 0 0 0 0 0 0 1 0 0;...
-%     0 0 0 0 0 0 0 0 0 0 0 1 0;...
-%     0 0 0 0 0 0 0 0 0 0 0 0 1]*x_dot;
-%disp(C);
-q1 = 0; q2 = 0; q3 = 0; q4 = 1;
-u = 0; v = 0; w = 133;
-rho = 1.225; 
-d = 0.2159; l = 0.44;
-A_fin = 0.00387;
+function states_i_dot = nonlinear_controller(states,rocket,motorCluster,thrust,windSpeed,fins)
+%% Define the quaternions
+    q           = states(7:10);
+%% External Forces (inertial frame)
+% Aerodynamic forces on rocket body
+    vel_i       = states(4:6);
+    vel_b       = quaternion_I_to_B(q,vel_i);
+    speed       = norm(vel_b);
+    alpha       = -atan2(vel_b(1),vel_b(3)); % Angle of attack
+    beta        = -asin(vel_b(2)/speed);     % Side-slip
+    
+    Cx_v        = rocket.Cla * sin(alpha) * rocket.area;
+    Cy_v        = rocket.Clb * sin(beta)  * rocket.area;
+    Cz_v        = rocket.Cd  * rocket.frontArea; % Estimating the drag to be directly opposite the nose
+    C_v         = [Cx_v; Cy_v; -Cz_v];
+    Fad_v       = 0.5*(1.225)*(speed^2).*C_v;
+    q_v         = angle2quat(0,-alpha,beta);
+    Fad_b_quat  = quatrotate(quatconj(q_v),Fad_v')';
+Fad_i           = quaternion_B_to_I(q,Fad_b_quat);
+    
+Fg_i            = [0;0;-9.8*rocket.m];
+   
+%% Wind Force
+%     windVel_b   = quaternion_I_to_B(q,[windSpeed;0;0]);
+%     alpha_wind  = -atan2(windVel_b(1),windVel_b(3)); % Angle of attack
+%     beta_wind   = -asin(windVel_b(2)/windSpeed);     % Side-slip
+%     
+%     Fx_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cla * rocket.area * sin(alpha_wind);
+%     Fy_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Clb * rocket.area * sin(beta_wind);
+%     Fz_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cd * rocket.frontArea;
+%     Fwind_v        = [Fx_wind; Fy_wind; Fz_wind];
+%     q_v            = angle2quat(0,-alpha_wind,beta_wind);
+%     Fwind_b_quat   = quatrotate(quatconj(q_v),Fwind_v')';
+Fwind_i            = [0.5*1.225*(windSpeed^2)*rocket.Cla; 0; 0];
+%% B matrix
 B = ...
-[[                                                                                                                          0,                                                                                                                           0,                                                                                                                         0,                                                                                                                           0];
+[                                                                                                                           0,                                                                                                                           0,                                                                                                                         0,                                                                                                                           0];
 [                                                                                                                           0,                                                                                                                           0,                                                                                                                         0,                                                                                                                           0];
 [                                                                                                                           0,                                                                                                                           0,                                                                                                                         0,                                                                                                                           0];
 [                                                                                                                           0,                                                                                                                           0,                                                                                                                         0,                                                                                                                           0];
@@ -96,36 +49,85 @@ B = ...
 [         - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2 - (A_fin*l*rho*(2*q1*q2 + 2*q3*q4)*(u^2 + v^2 + w^2)^4)/2,   (A_fin*l*rho*(u^2 + v^2 + w^2)^4*(q1^2 - q2^2 + q3^2 - q4^2))/2 - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2,         (A_fin*l*rho*(2*q1*q2 + 2*q3*q4)*(u^2 + v^2 + w^2)^4)/2 - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2, - (A_fin*l*rho*(u^2 + v^2 + w^2)^4*(q1^2 - q2^2 + q3^2 - q4^2))/2 - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2];
 [ - (A_fin*d*rho*(u^2 + v^2 + w^2)^4*(q1^2 + q2^2 - q3^2 - q4^2))/2 - (A_fin*l*rho*(2*q1*q3 - 2*q2*q4)*(u^2 + v^2 + w^2)^4)/2, - (A_fin*d*rho*(u^2 + v^2 + w^2)^4*(q1^2 + q2^2 - q3^2 - q4^2))/2 - (A_fin*l*rho*(2*q1*q4 + 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2, (A_fin*l*rho*(2*q1*q3 - 2*q2*q4)*(u^2 + v^2 + w^2)^4)/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)^4*(q1^2 + q2^2 - q3^2 - q4^2))/2,   (A_fin*l*rho*(2*q1*q4 + 2*q2*q3)*(u^2 + v^2 + w^2)^4)/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)^4*(q1^2 + q2^2 - q3^2 - q4^2))/2]];
 
+%% External force
+Fexternal_i     = Fg_i + Fad_i + Fwind_i;
 
-B = B'
+%% Thrust force
+    [~, motorCount] = size(motorCluster);
+    Tmotors     = [zeros(2,motorCount);thrust]; % Creates a column vector for each motor    
+    Tnet_b      = sum(Tmotors,2);
+    Tnet_i      = quaternion_B_to_I(q,Tnet_b);
+%% Net Force on the rocket body
+Fnet_i      = Fexternal_i + Tnet_i;
 
+%% External Moments (inertial frame)
+% Rotate the distance from CP to CG into the inertial frame
+    cp2cg_b     = rocket.dcp-rocket.dcg;
+    cp2cg_i     = quaternion_B_to_I(q,cp2cg_b); % distance from the cp to cg in inertial frame  
+% Moment due to aerodynamic force of rocket body
+Mad_i       = cross(cp2cg_i,Fad_i);
 
+%% Moments due to rocket motors
+    thrustCGOffset  = rocket.L; % Motor offset from the CG
+    for i = 1:motorCount
+        Mmotors_b(:,i) = cross([motorCluster(i).location(1:2);thrustCGOffset],Tmotors(:,i));
+    end
+    Mmotors_net_b = sum(Mmotors_b,2);
+Mmotors_net_i = quaternion_B_to_I(q,Mmotors_net_b);
+%% Moments due to Fins
+% Fin locations (body fixed)
+    finLatOffset = 0.2;      % Flipper offset from z-axis
+    finCGOffset  = (rocket.dcg(3) - rocket.L); % Flipper offset from the CG
+    r1_b         = [finLatOffset;  0;            finCGOffset];
+    r2_b         = [0;             finLatOffset; finCGOffset];
+    r3_b         = [-finLatOffset; 0;            finCGOffset];
+    r4_b         = [0;            -finLatOffset; finCGOffset];
+% Fin forces
+    F1_b         = [0       ; fins(1) ; 0];
+    F2_b         = [-fins(2); 0       ; 0];
+    F3_b         = [0       ; -fins(3); 0];
+    F4_b         = [fins(4) ; 0       ; 0];
+% body-fixed moments due to the flippers
+    M1_b         = cross(r1_b,F1_b);
+    M2_b         = cross(r2_b,F2_b);
+    M3_b         = cross(r3_b,F3_b);
+    M4_b         = cross(r4_b,F4_b);
+    Mfins_b      = M1_b + M2_b + M3_b + M4_b;
+% intertial-frame moments due to the flippers
+Mfins_i      = quaternion_B_to_I(q,Mfins_b);
+    
+%% Net moments on the rocket body
+    Mnet_i       = Mad_i + Mfins_i + Mmotors_net_i;    
+    Mnet_b       = quaternion_I_to_B(q,Mnet_i);        % Body-fixed net moments
+    w_b          = quaternion_I_to_B(q,states(11:13)); % Body-fixed angular velocity
+%% Omega Matrix and angular momentum to calculate qdot
+    Omega       = [[0            states(13) -states(12) states(11)];
+                   [-states(13)  0           states(11) states(12)];
+                   [ states(12) -states(11)  0          states(13)];
+                   [-states(11) -states(12) -states(13) 0         ]];
+    H           =  (rocket.I)'.*states(11:13);                   % angular momentum
 
+%% Define states_i_dot as the solutions to the equations of motion
+posdot_i    = vel_i;                  % inertial frame velocity
+veldot_i    = Fnet_i / rocket.m;         % inertial frame acceleration
+q_shifted   = circshift(q,-1);           % need to move the scalar part back to the 4th index
+qdot        = circshift(0.5*Omega*q_shifted,1);   % time derivative of quaternions
+wdot        = ((Mnet_i-cross(states(11:13),H))' ./ (rocket.I))'; % angular acceleration
 
+%% Output term (dx)
+states_i_dot    = [posdot_i; veldot_i; qdot; wdot];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% end of Equations of Motion
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%% quaternion_I_to_B
+function B = quaternion_I_to_B(q,A)
+% Rotation from Inertial fixed to Body frame
+B = quatrotate(q',A')';
+end
+%% quaternion_B_to_I
+function I = quaternion_B_to_I(q,A)
+% Rotation from Body fixed to Inertial frame
+I = quatrotate(quatconj(q'),A')';
+end
+end

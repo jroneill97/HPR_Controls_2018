@@ -49,6 +49,7 @@ end
 numMotors      = size(motorCluster); % size is the number of rocket motors
 options        = odeset('JConstant','on', 'RelTol',1e-4, 'AbsTol',1e-4);
 
+%%
 for i = 1:nsteps 
     t1 = stepSize*(i-1);
     t2 = stepSize*i;
@@ -64,19 +65,19 @@ for i = 1:nsteps
     motorCluster(1).enable = 1;
     motorCluster(2).enable = 1;
     motorCluster(3).enable = 1;
-    motorCluster(4).enable = 0; %
-    motorCluster(5).enable = 0; % The four booster motors
-    motorCluster(6).enable = 0; %
-    motorCluster(7).enable = 0; %
+    motorCluster(4).enable = 1; %
+    motorCluster(5).enable = 1; % The four booster motors
+    motorCluster(6).enable = 1; %
+    motorCluster(7).enable = 1; %
     
 %% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
-      currentWindVel = 0;%wind.velocity(index);
+      currentWindVel = wind.velocity(index);
 
 %% Solve the ODE    
 switch parachuteDeployed
     case false
-    [tNew,tempStates] = ode45(@(tNew,currentStates) EquationsOfMotion(currentStates,rocket,motorCluster,...
+    [tNew,tempStates] = ode45(@(tNew,currentStates) nonlinear_controller(currentStates,rocket,motorCluster,...
                                                                  currentThrust,currentWindVel,...
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,currentStates,options);

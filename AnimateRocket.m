@@ -3,19 +3,23 @@ function AnimateRocket(tspan,states,rocket,zoom,cameraMode)
 %% Draw the rocket body
 radius = rocket.body_diam / 2;
 % Draw the rocket and axis bars
-
-[xc, yc, zc]    = cylinder([radius  0]  ,7);    % nose cone
-[xa,  ya,  za ] = cylinder( radius      ,7);    % cylinder above CG
-[xb,  yb,  zb ] = cylinder( radius      ,7);    % cylinder below CG
-[x,   y,   z  ] = cylinder( 0.005       ,7);    % axis bars
-% Rocket body
-h(1) = surface(xc,yc , (rocket.noseL*zc+(rocket.L-rocket.noseL))        ,'FaceColor','white');
-h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - (rocket.L - rocket.dcg(3)))*za + (rocket.L - rocket.dcg(3)))  ,'FaceColor','white');
-h(3) = surface(xb,yb , ((rocket.L - rocket.dcg(3))*zb)                                  ,'FaceColor','white');
-% Axis bars
-h(4) = surface(z ,x  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','blue' ,'EdgeColor','none');
-h(5) = surface(x ,z  , (y + (rocket.L - rocket.dcg(3))) ,'FaceColor','green','EdgeColor','none');
-h(6) = surface(x ,y  , (z + rocket.L)   ,'FaceColor','red'  ,'EdgeColor','none');
+if cameraMode == "follow"
+    [xc, yc, zc]    = cylinder([radius  0]  ,7);    % nose cone
+    [xa,  ya,  za ] = cylinder( radius      ,7);    % cylinder above CG
+    [xb,  yb,  zb ] = cylinder( radius      ,7);    % cylinder below CG
+    [x,   y,   z  ] = cylinder( 0.005       ,7);    % axis bars
+    
+    % Rocket body
+    h(1) = surface(xc,yc , (rocket.noseL*zc+(rocket.L-rocket.noseL)) ,'FaceColor','white');
+    h(2) = surface(xa,ya , ((rocket.L-rocket.noseL - (rocket.L + rocket.dcg(3)))*za + (rocket.L + rocket.dcg(3)))  ,'FaceColor','white');
+    h(3) = surface(xb,yb , ((rocket.L + rocket.dcg(3))*zb),'FaceColor','white');
+    
+    % Axis bars
+    h(4) = surface(z ,x  , (y + (rocket.L + rocket.dcg(3))) ,'FaceColor','blue' ,'EdgeColor','none');
+    h(5) = surface(x ,z  , (y + (rocket.L + rocket.dcg(3))) ,'FaceColor','green','EdgeColor','none');
+    h(6) = surface(x ,y  , (z + rocket.L)                   ,'FaceColor','red'  ,'EdgeColor','none');
+    
+end
 switch cameraMode
     case 'follow'
         axis off
@@ -25,6 +29,10 @@ switch cameraMode
         grid on
         box on
         axis equal
+        % Create rocket body from h
+        rocketBody = hgtransform('Parent',ax);
+        set(h,'Parent',rocketBody);                % gathers all points in h into a single "parent"
+        set(gcf,'Renderer','opengl');
     case 'stationary'
         axis off
         ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
@@ -39,14 +47,15 @@ switch cameraMode
                   'ZLim',[0                    max(states(:,3))+10]);
         grid on
         box on
+    case 'plot_circle'
+%         axis off
+%         ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
+%                   'YLim',[min(states(:,2))-10 max(states(:,2))+10],...
+%                   'ZLim',[0                    max(states(:,3))+10]);
+
 
         %axis equal
 end
-      
-% Create rocket body from h
-rocketBody = hgtransform('Parent',ax);
-set(h,'Parent',rocketBody);                % gathers all points in h into a single "parent"
-set(gcf,'Renderer','opengl');
 
 %% Interprit translational and angular position from states matrix
 % Translational position
@@ -66,9 +75,9 @@ switch cameraMode
            for i = 2:length(tspan)
             pause(.1)
             set(rocketBody,'Matrix',...
-               makehgtform('translate',pos_i(i-1,:)'+rocket.dcg,...
+               makehgtform('translate',pos_i(i-1,:)'-rocket.dcg,...
                            'axisrotate',[u(i-1,1), u(i-1,2), u(i-1,3)],theta(i),...
-                           'translate',-(pos_i(i-1,:)'+rocket.dcg),...
+                           'translate',-(pos_i(i-1,:)'-rocket.dcg),...
                            'translate',pos_i(i-1,:)')); 
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);           
@@ -96,6 +105,24 @@ switch cameraMode
             xlabel('X');
             ylabel('Y');
             zlabel('Z');
+            
+    case 'plot_circle'
+        %view([45 45]);
+        hold on
+        grid on
+        box on
+        axis equal
+%         plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3),'MarkerSize',1);
+%             xlabel('X');
+%             ylabel('Y');
+%             zlabel('Z');
+        radius = norm(states(end,1:2));
+        theta = 0 : 0.01 : 2*pi;
+        x = radius * cos(theta);
+        y = radius * sin(theta);
+        plot(x, y);
+        xlim([-(radius) radius]);
+        ylim([-(radius) radius]);
 end
 
 
