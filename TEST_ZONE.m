@@ -69,7 +69,7 @@ M_fins_i = M_fins_b*R_bi;
 % 
 % vars = [x; y; z; u; v; w; q1; q2; q3; q4; wx; wy; wz];
 % A = jacobian(x_dot,vars); %13x13 matrix
-B = [zeros(11,4);jacobian(M_fins_i,[u1 u2 u3 u4])];
+B = [zeros(10,4);jacobian(M_fins_i,[u1 u2 u3 u4])];
 % C = [0 0 1 0 0 0 0 0 0 0 0 0 0;...
 %     0 0 0 0 0 0 0 0 0 0 1 0 0;...
 %     0 0 0 0 0 0 0 0 0 0 0 1 0;...
@@ -83,12 +83,11 @@ d = 0.2159; l = 0.44;
 A_fin = 0.00387;
 
 w2=1:134;
-b12=zeros(length(w2),1);
+b11=zeros(length(w2),1);
 for i = 0:133
     w=i+1;
-    B = ...
-    [[                                                                                                                       0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
-    [                                                                                                                       0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
+    B = ...                                                                                                                      
+    [[                                                                                                                      0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
     [                                                                                                                       0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
     [                                                                                                                       0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
     [                                                                                                                       0,                                                                                                                       0,                                                                                                                     0,                                                                                                                       0]
@@ -101,10 +100,10 @@ for i = 0:133
     [   (A_fin*d*rho*(2*q1*q3 + 2*q2*q4)*(u^2 + v^2 + w^2))/2 - (A_fin*l*rho*(u^2 + v^2 + w^2)*(q1^2 - q2^2 - q3^2 + q4^2))/2,           (A_fin*d*rho*(2*q1*q3 + 2*q2*q4)*(u^2 + v^2 + w^2))/2 - (A_fin*l*rho*(2*q1*q2 - 2*q3*q4)*(u^2 + v^2 + w^2))/2, (A_fin*d*rho*(2*q1*q3 + 2*q2*q4)*(u^2 + v^2 + w^2))/2 + (A_fin*l*rho*(u^2 + v^2 + w^2)*(q1^2 - q2^2 - q3^2 + q4^2))/2,           (A_fin*d*rho*(2*q1*q3 + 2*q2*q4)*(u^2 + v^2 + w^2))/2 + (A_fin*l*rho*(2*q1*q2 - 2*q3*q4)*(u^2 + v^2 + w^2))/2]
     [         - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2))/2 - (A_fin*l*rho*(2*q1*q2 + 2*q3*q4)*(u^2 + v^2 + w^2))/2,   (A_fin*l*rho*(u^2 + v^2 + w^2)*(q1^2 - q2^2 + q3^2 - q4^2))/2 - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2))/2,         (A_fin*l*rho*(2*q1*q2 + 2*q3*q4)*(u^2 + v^2 + w^2))/2 - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2))/2, - (A_fin*d*rho*(2*q1*q4 - 2*q2*q3)*(u^2 + v^2 + w^2))/2 - (A_fin*l*rho*(u^2 + v^2 + w^2)*(q1^2 - q2^2 + q3^2 - q4^2))/2]
     [ - (A_fin*l*rho*(2*q1*q3 - 2*q2*q4)*(u^2 + v^2 + w^2))/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)*(q1^2 + q2^2 - q3^2 - q4^2))/2, - (A_fin*l*rho*(2*q1*q4 + 2*q2*q3)*(u^2 + v^2 + w^2))/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)*(q1^2 + q2^2 - q3^2 - q4^2))/2, (A_fin*l*rho*(2*q1*q3 - 2*q2*q4)*(u^2 + v^2 + w^2))/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)*(q1^2 + q2^2 - q3^2 - q4^2))/2,   (A_fin*l*rho*(2*q1*q4 + 2*q2*q3)*(u^2 + v^2 + w^2))/2 - (A_fin*d*rho*(u^2 + v^2 + w^2)*(q1^2 + q2^2 - q3^2 - q4^2))/2]]';
-    b12(w) = B(1,12);
+    b11(w) = B(1,11);
 end
 disp(B);
-plot(w2,b12);
+plot(w2,b11);
 
 
 
