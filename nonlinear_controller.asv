@@ -1,4 +1,4 @@
-function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,windSpeed,fins)
+function states_i_dot = nonlinear_controller(states,rocket,motorCluster,thrust,windSpeed,fins)
 %% Define the quaternions
     q           = states(7:10);
 %% External Forces (inertial frame)
@@ -32,6 +32,23 @@ Fg_i            = [0;0;-9.8*rocket.m];
 %     q_v            = angle2quat(0,-alpha_wind,beta_wind);
 %     Fwind_b_quat   = quatrotate(quatconj(q_v),Fwind_v')';
 Fwind_i            = [0.5*1.225*(windSpeed^2)*rocket.Cla; 0; 0];
+%% B matrix
+B = 1e14* ...
+[[        0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[         0         0         0         0];
+[   -18.7275         0    18.7275         0];
+[         0   -18.7275         0    18.7275];
+[    9.1892    9.1892    9.1892    9.1892]];
+
 %% External force
 Fexternal_i     = Fg_i + Fad_i + Fwind_i;
 
@@ -59,7 +76,7 @@ Mad_i       = cross(cp2cg_i,Fad_i);
 Mmotors_net_i = quaternion_B_to_I(q,Mmotors_net_b);
 %% Moments due to Fins
 % Fin locations (body fixed)
-    finLatOffset = 0.2159;      % Flipper offset from z-axis
+    finLatOffset = 0.2;      % Flipper offset from z-axis
     finCGOffset  = (rocket.dcg(3) - rocket.L); % Flipper offset from the CG
     r1_b         = [finLatOffset;  0;            finCGOffset];
     r2_b         = [0;             finLatOffset; finCGOffset];

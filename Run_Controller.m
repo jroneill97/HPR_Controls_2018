@@ -26,6 +26,21 @@ states(6)     = 0.000001;
 states(5)     = 0.0;
 states(4)     = 0.0;
 
+B = ...
+    [[         0          0         0         0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [   -18.7275         0    18.7275         0];
+    [         0   -18.7275         0    18.7275];
+    [    9.1892     9.1892    9.1892    9.1892]]';
+
 abortAngle = deg2rad(5);
 
 t0       = 0;        % Initial Time
@@ -73,13 +88,16 @@ for i = 1:nsteps
 %% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
       currentWindVel = wind.velocity(index);
-
+%% Calculate input angles
+u = -B*currentStates;
 %% Solve the ODE    
 switch parachuteDeployed
     case false
-    [tNew,tempStates] = ode45(@(tNew,currentStates) nonlinear_controller(currentStates,rocket,motorCluster,...
+
+    
+    [tNew,tempStates] = ode45(@(tNew,currentStates) EquationsOfMotion(currentStates,rocket,motorCluster,...
                                                                  currentThrust,currentWindVel,...
-                                                                 [0;0;0;0]),...
+                                                                 u),...
                                                                  temp_tspan,currentStates,options);
     case true
     [tNew,tempStates] = ode45(@(tNew,currentStates) MainChuteEquationsOfMotion(currentStates,rocket,mainChute,currentWindVel),...
@@ -126,5 +144,5 @@ clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius
 %% Animate the resulting state array
 zoom = 100; % Distance from camera to the rocket (m)
 %plot(t,states(:,1:3));
-AnimateRocket(t,states,rocket,zoom,'plot'); % 'plot', 'plot_circle', 'follow', 'stationary'
+AnimateRocket(t,states,rocket,zoom,'follow'); % 'plot', 'plot_circle', 'follow', 'stationary'
 fprintf("Animation Complete \n");
