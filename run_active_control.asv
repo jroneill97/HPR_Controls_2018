@@ -31,7 +31,7 @@ abortAngle = deg2rad(5);
 t0       = 0;        % Initial Time
 tf       = 300;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 20000;      % FFT % Number of steps between t0 and tf ("resolution")
+nsteps   = 10000;      % FFT % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -73,7 +73,7 @@ w = currentStates(6);
 [  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,           -0.001*(w)^2, (5.1176e-04)*w^2];
 [  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0.001*(w)^2,  0,           (5.1176e-04)*w^2];
 [  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,            0.001*(w)^2, (5.1176e-04)*w^2]];
-u(:,i) = -2*B*currentStates;
+u(:,i) = -0.5*B*currentStates;
 %% Solve the ODE    
 switch parachuteDeployed
     case false
@@ -84,9 +84,9 @@ switch parachuteDeployed
                                                                  u(:,i)),...
                                                                  temp_tspan,currentStates,options);
     case true
+    %[tNew,tempStates] = ode45(@(tNew,currentStates) main_chute_equations_of_motion(currentStates,rocket,mainChute),...
+    %                                                             temp_tspan,currentStates,options);
     break
-    [tNew,tempStates] = ode45(@(tNew,currentStates) main_chute_equations_of_motion(currentStates,rocket,mainChute),...
-                                                                 temp_tspan,currentStates,options);
 end
     t(i) = t2;
     currentStates = tempStates(nip+1,1:13)';
@@ -128,10 +128,11 @@ end
 clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius u
 %% Animate the resulting state array
 zoom = 100; % Distance from camera to the rocket (m)
-plot(t,rad2deg(u(:,1:length(t))));
+%plot(t,states(:,1:3));
+plot(t,u(:,rad2deg(1:length(t))));
 xlabel('time (sec)');
 ylabel('fin angle (degrees)');
-title('Fin Angle vs. Time');
+title('Fin Ang
 figure;
 animate_rocket(t,states,rocket,zoom,'follow'); % 'plot', 'plot_circle', 'follow', 'stationary'
 fprintf("Animation Complete \n");

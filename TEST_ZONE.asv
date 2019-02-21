@@ -7,10 +7,10 @@ clc; clear all; close all;
 % w0 = [wx ;wy; wz];
 % speed = sqrt(u^2+v^2+w^2);
 % % 
- f1 = 0.5*rho*A_rudder*u1*speed^2;
- f2 = 0.5*rho*A_rudder*u2*speed^2;
- f3 = 0.5*rho*A_rudder*u3*speed^2;
- f4 = 0.5*rho*A_rudder*u4*speed^2;
+ f1 = 0.5*rho*A_fin*u1*speed^2;
+ f2 = 0.5*rho*A_fin*u2*speed^2;
+ f3 = 0.5*rho*A_fin*u3*speed^2;
+ f4 = 0.5*rho*A_fin*u4*speed^2;
 % % 
  M_fins_b = [l*(f3-f1) l*(f4-f2) d*(f1+f2+f3+f4)];
 % 
@@ -80,7 +80,7 @@ q1 = 0; q2 = 0; q3 = 0; q4 = 1;
 u = 0; v = 0; w = 133;
 rho = 1.225; 
 d = 0.2159; l = 0.44;
-A_rudder = 0.00387;
+A_fin = 0.00387;
 
 % w2=1:134;
 % b11=zeros(length(w2),1);
