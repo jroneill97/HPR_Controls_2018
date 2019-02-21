@@ -1,4 +1,4 @@
-function states_i_dot = EquationsOfMotion(states,rocket,motorCluster,thrust,windSpeed,fins)
+function states_i_dot = equations_of_motion(states,rocket,motorCluster,thrust,windSpeed,fins)
 %% Define the quaternions
     q           = states(7:10);
 %% External Forces (inertial frame)

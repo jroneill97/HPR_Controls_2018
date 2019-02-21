@@ -1,4 +1,4 @@
-function AnimateRocket(tspan,states,rocket,zoom,cameraMode)
+function animate_rocket(tspan,states,rocket,zoom,cameraMode)
 
 %% Draw the rocket body
 radius = rocket.body_diam / 2;

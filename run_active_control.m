@@ -1,6 +1,6 @@
 clc; clear; close all;
 load rocket;
-load motorCluster;
+load motorCluster_v3;
 load wind;
 load parachutes;
 %% References
@@ -26,6 +26,21 @@ states(6)     = 0.000001;
 states(5)     = 0.0;
 states(4)     = 0.0;
 
+B = ...
+    [[         0          0         0         0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [         0          0         0          0];
+    [   -1         0    1         0];
+    [         0   -1         0    1];
+    [    .5     .5    .5    .5]]';
+
 abortAngle = deg2rad(5);
 
 t0       = 0;        % Initial Time
@@ -41,14 +56,15 @@ tspan    = [t0:stepSize:tf]'; % Total time span
 currentStates = states';            % State array used inside the loop
 
 %% Re-map the thrust data to fit the time span array
-motorCluster = CreateThrustCurves(motorCluster,tspan);
-for i = 1:7
+motorCluster = create_thrust_curves(motorCluster,tspan);
+numMotors      = size(motorCluster); % size is the number of rocket motors
+for i = 1:numMotors(2)
     motorCluster(i).enable = 1;
 end
 %% Solve the equations of motion
-numMotors      = size(motorCluster); % size is the number of rocket motors
 options        = odeset('JConstant','on', 'RelTol',1e-4, 'AbsTol',1e-4);
 
+%%
 for i = 1:nsteps 
     t1 = stepSize*(i-1);
     t2 = stepSize*i;
@@ -61,27 +77,23 @@ for i = 1:nsteps
                                                                                  % component sets the thrust for that motor
                                                                                  % to zero if enable is set to 0.
     end   
-    motorCluster(1).enable = 1;
-    motorCluster(2).enable = 1;
-    motorCluster(3).enable = 1;
-    motorCluster(4).enable = 0; %
-    motorCluster(5).enable = 0; % The four booster motors
-    motorCluster(6).enable = 0; %
-    motorCluster(7).enable = 0; %
     
 %% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
-      currentWindVel = 0;%wind.velocity(index);
-
+      currentWindVel = 0.1*wind.velocity(index);
+%% Calculate input angles
+u(:,i) = 2*B*currentStates;
 %% Solve the ODE    
 switch parachuteDeployed
     case false
-    [tNew,tempStates] = ode45(@(tNew,currentStates) EquationsOfMotion(currentStates,rocket,motorCluster,...
+
+    
+    [tNew,tempStates] = ode45(@(tNew,currentStates) equations_of_motion(currentStates,rocket,motorCluster,...
                                                                  currentThrust,currentWindVel,...
-                                                                 [0;0;0;0]),...
+                                                                 u(:,i)),...
                                                                  temp_tspan,currentStates,options);
     case true
-    [tNew,tempStates] = ode45(@(tNew,currentStates) MainChuteEquationsOfMotion(currentStates,rocket,mainChute,currentWindVel),...
+    [tNew,tempStates] = ode45(@(tNew,currentStates) main_chute_equations_of_motion(currentStates,rocket,mainChute),...
                                                                  temp_tspan,currentStates,options);
 end
     t(i) = t2;
@@ -121,9 +133,9 @@ end
     end
     fprintf("time = %0.1f\n",t2);
 end
-clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius
+clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius u
 %% Animate the resulting state array
 zoom = 100; % Distance from camera to the rocket (m)
 %plot(t,states(:,1:3));
-AnimateRocket(t,states,rocket,zoom,'plot'); % 'plot', 'plot_circle', 'follow', 'stationary'
+animate_rocket(t,states,rocket,zoom,'follow'); % 'plot', 'plot_circle', 'follow', 'stationary'
 fprintf("Animation Complete \n");

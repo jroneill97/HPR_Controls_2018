@@ -1,4 +1,4 @@
-function states_i_dot = MainChuteEquationsOfMotion(states,rocket,mainChute,windSpeed)
+function states_i_dot = main_chute_equations_of_motion(states,rocket,mainChute)
 %% Define the quaternions
     q           = states(7:10);
 %% External Forces (inertial frame)

@@ -1,4 +1,4 @@
-function motorCluster = CreateThrustCurves(motorCluster,newTimeSpan)
+function motorCluster = create_thrust_curves(motorCluster,newTimeSpan)
 % Redefines the motorCluster struct so that it fits in the 
 % newly specified time span (newTimeSpan)
 for i = 1:length(motorCluster)
