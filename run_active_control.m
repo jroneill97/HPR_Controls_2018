@@ -17,7 +17,7 @@ parachuteDeployed = false;
 states = zeros(1,13); % initialize state matrix
 
 initial_yaw   = 0.000001;
-initial_pitch = 0.0;
+initial_pitch = 0.01;
 initial_roll  = 0.0;
 states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
@@ -31,7 +31,7 @@ abortAngle = deg2rad(5);
 t0       = 0;        % Initial Time
 tf       = 300;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 20000;      % FFT % Number of steps between t0 and tf ("resolution")
+nsteps   = 10000;      % FFT % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -67,13 +67,14 @@ for i = 1:nsteps
     [~,index] = min(abs(currentStates(3)-wind.altitude));
       currentWindVel = wind.velocity(index);
 %% Calculate input angles
-w = currentStates(6);
+val = 10;
  B =...
-[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.001*(w)^2,  0,           (5.1176e-04)*w^2];
-[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,           -0.001*(w)^2, (5.1176e-04)*w^2];
-[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0.001*(w)^2,  0,           (5.1176e-04)*w^2];
-[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,            0.001*(w)^2, (5.1176e-04)*w^2]];
-u(:,i) = -2*B*currentStates;
+[[ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -val,  0,           val/2];
+[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,           -val, val/2];
+[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  val,  0,           val/2];
+[  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,            val, val/2]];
+u(:,i) = -B*currentStates;
+
 %% Solve the ODE    
 switch parachuteDeployed
     case false

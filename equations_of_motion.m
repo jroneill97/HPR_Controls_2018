@@ -60,13 +60,29 @@ M_motors_net_i = quaternion_B_to_I(q,Mmotors_net_b);
 %% Moments due to Fins
 % Fin locations (body fixed)
 d = 0.2159;                      % Flipper offset from z-axis
-l  = (rocket.dcg(3) + rocket.L); % Flipper offset from the CG
-f1 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(1))*min(abs(u(1)),deg2rad(20));
-f2 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(2))*min(abs(u(2)),deg2rad(20));
-f3 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(3))*min(abs(u(3)),deg2rad(20));
-f4 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(4))*min(abs(u(4)),deg2rad(20));
+l  = -(rocket.dcg(3) + rocket.L); % Flipper offset from the CG
+f1 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(1))*2*pi*min(abs(u(1)),deg2rad(30));
+f2 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(2))*2*pi*min(abs(u(2)),deg2rad(30));
+f3 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(3))*2*pi*min(abs(u(3)),deg2rad(30));
+f4 = 0.5*(1.225)*rocket.A_rudder*speed^2*sign(u(4))*2*pi*min(abs(u(4)),deg2rad(30));
 % %
-M_rudder_b = [l*(f3-f1) l*(f4-f2) d*(f1+f2+f3+f4)]';
+r1_b = [ d  0   l];
+r2_b = [ 0  d   l];
+r3_b = [-d  0   l];
+r4_b = [ 0 -d   l];
+ 
+f1_b = [ 0   f1  0];
+f2_b = [-f2   0  0];
+f3_b = [ 0   -f3 0];
+f4_b = [ f4  0   0];
+
+M1_rudder_b =  cross(f1_b,r1_b);
+M2_rudder_b =  cross(f2_b,r2_b);
+M3_rudder_b =  cross(f3_b,r3_b);
+M4_rudder_b =  cross(f4_b,r4_b);
+
+%  M_rudder_b = (M1_rudder_b + M2_rudder_b + M3_rudder_b + M4_rudder_b)'
+M_rudder_b = [l*(f1-f3); l*(f2-f4); -d*(f1+f2+f3+f4)];
 % intertial-frame moments due to the flippers
 M_rudder_i      = quaternion_B_to_I(q,M_rudder_b);
 
