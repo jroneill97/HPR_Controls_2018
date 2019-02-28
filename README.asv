@@ -1,4 +1,7 @@
 # High Powered Rocketry Major Qualifying Project
+## Flight Dynamics and Stability Team
+## 2018-2019
 
-
-run_passive_control.m or run_active_control.m to simulate your launch
+# Creating a Launch Simulation
+- Open 
+/Scripts/run_passive_control.m

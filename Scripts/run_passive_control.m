@@ -1,8 +1,9 @@
 % Main launch simulator
 % Authors: WPI Flight Dynamics and Stability MQP team
 % Date:    02/28/2019
-
 clc; clear; close all;
+addpath('../Functions');
+addpath('../Data_Files');
 options = odeset('JConstant','on', 'RelTol',1e-4, 'AbsTol',1e-4);
 load rocket;
 load wind;
@@ -15,7 +16,7 @@ initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
 load motorCluster_v3;              % Choose motor configuration.
 motor_enable     = [1];            % Enable array (length must = # of motors)
 simulate_landing = 1;              % 1: simulate descent 0: break at apogee
-include_wind     = 0;              % 1: include 0: do not include
+include_wind     = 1;              % 1: include 0: do not include
 animation_type   = 'plot';         % 'plot','plot_circle','follow','stationary'
 %% Initialize
 states = zeros(1,13); % initialize state matrix
