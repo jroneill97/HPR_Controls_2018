@@ -1,22 +1,21 @@
-% Main launch simulator
-% Authors: WPI Flight Dynamics and Stability MQP team
-% Date:    02/28/2019
-
 clc; clear; close all;
 options = odeset('JConstant','on', 'RelTol',1e-4, 'AbsTol',1e-4);
 load rocket;
 load wind;
 load parachutes;
+
 %% Define your initial conditions and user inputs (inertial reference frame)
 initial_pos      = [0.0 0.0 0.0];  % Initial translational position
 initial_euler    = [0.0 0.0 0.0];  % Initial euler angles
 initial_vel      = [0.0 0.0 0.0];  % Initial velocity
 initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
+include_wind     = 1;              % 1: include 0: do not
 load motorCluster_v3;              % Choose motor configuration.
 motor_enable     = [1];            % Enable array (length must = # of motors)
-simulate_landing = 1;              % 1: simulate descent 0: break at apogee
-include_wind     = 0;              % 1: include 0: do not include
+simulate_landing = 1;              % 1: Simulate parachute descent
+                                   % 0: Stop simulation at apogee
 animation_type   = 'plot';         % 'plot','plot_circle','follow','stationary'
+
 %% Initialize
 states = zeros(1,13); % initialize state matrix
 states(1:3)   = initial_pos';
@@ -38,21 +37,25 @@ numMotors      = size(motorCluster); % size is the number of rocket motors
 for i = 1:numMotors(2)
 motorCluster(i).enable = motor_enable(i);
 end
+
 %% Begin solving for flight trajectory
 for i = 1:nsteps 
     t1 = stepSize*(i-1);
     t2 = stepSize*i;
-    temp_tspan = t1:(t2-t1)/nip:t2;   
-%% Find the thrust at current time
+    temp_tspan = t1:(t2-t1)/nip:t2;
+    
+%% Find the thrust at the current time
     [~,index] = min(abs(t2-tspan));
     for j = 1:numMotors(2)
       currentThrust(j) = motorCluster(j).enable * motorCluster(j).thrust(index); % Thrust in the inertial z axis. the Enable 
                                                                                  % component sets the thrust for that motor
                                                                                  % to zero if enable is set to 0.
-    end       
-%% Find the wind velocity at current altitude
+    end   
+    
+%% Find the wind velocity at this altitude
     [~,index] = min(abs(currentStates(3)-wind.altitude));
-      currentWindVel = include_wind*wind.velocity(index);
+      currentWindVel = wind.velocity(index);
+
 %% Solve the ODE    
 switch parachuteDeployed
     case false
@@ -67,7 +70,8 @@ switch parachuteDeployed
 end
     t(i) = t2;
     currentStates = tempStates(nip+1,1:13)';
-    states(i,:) = currentStates';   
+    states(i,:) = currentStates';
+    
 %% Break conditions
     % break if apogee is reached
     if (states(i,6) <= 0) && (parachuteDeployed == false)
@@ -84,6 +88,7 @@ end
     end
 fprintf("time = %0.1f\n",t2);
 end
+
 %% Animate the resulting state array
 animate_rocket(t,states,rocket,50,animation_type);
 fprintf("Animation Complete \n");

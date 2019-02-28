@@ -1,4 +1,4 @@
-# HPR_Controls_2018
-Controls Team for the 2018 HPR MQP
+# High Powered Rocketry Major Qualifying Project
+## Flight Dynamics and Stability Team
+## 2018-2019
 
-run_passive_control.m or run_active_control.m to simulate your launch
