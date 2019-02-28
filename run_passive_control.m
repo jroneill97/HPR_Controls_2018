@@ -23,15 +23,15 @@ states(7:10)  = angle2quat(initial_yaw,initial_pitch,initial_roll,'ZYX');
 % quaternion in which the scalar part is the first index
 states(11:13) = [0.0 0.0 0.0];
 states(6)     = 0.000001;
-states(5)     = 0.0;
 states(4)     = 0.0;
+states(5)     = 0.0;
 
 abortAngle = deg2rad(5);
 
 t0       = 0;        % Initial Time
 tf       = 300;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 1000;      % FFT % Number of steps between t0 and tf ("resolution")
+nsteps   = 10000;      % FFT % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
@@ -74,6 +74,7 @@ switch parachuteDeployed
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,currentStates,options);
     case true
+    break
     [tNew,tempStates] = ode45(@(tNew,currentStates) main_chute_equations_of_motion(currentStates,rocket,mainChute),...
                                                                  temp_tspan,currentStates,options);
 end
@@ -116,7 +117,7 @@ end
 end
 clearvars -except t states stepSize rocket motorCluster yaw pitch roll radius
 %% Animate the resulting state array
-zoom = 200; % Distance from camera to the rocket (m)
+zoom = 50; % Distance from camera to the rocket (m)
 %plot(t,states(:,1:3));
-animate_rocket(t,states,rocket,zoom,'plot'); % 'plot', 'plot_circle', 'follow', 'stationary'
+animate_rocket(t,states,rocket,zoom,'follow'); % 'plot', 'plot_circle', 'follow', 'stationary'
 fprintf("Animation Complete \n");
