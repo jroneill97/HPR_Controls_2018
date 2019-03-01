@@ -17,7 +17,7 @@ load motorCluster_v3;              % Choose motor configuration. (v1, v2, v3)
 motor_enable     = [1];            % Enable array (length must = # of motors)
 simulate_landing = 1;              % 1: simulate descent 0: break at apogee
 include_wind     = 1;              % 1: include 0: do not include
-animation_type   = 'plot';         % 'plot','plot_circle','follow','stationary'
+plot_type        = 'plot';         % 'plot','plot_circle','follow','stationary'
 %% Initialize
 states = zeros(1,13); % initialize state matrix
 states(1:3)   = initial_pos';
@@ -86,6 +86,6 @@ end
 fprintf("time = %0.1f\n",t2);
 end
 %% Animate the resulting state array
-animate_rocket(t,states,rocket,50,animation_type);
+animate_rocket(t,states,rocket,50,plot_type);
 fprintf("Animation Complete \n");
 
