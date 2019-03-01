@@ -2,7 +2,7 @@
 ## Flight Dynamics and Stability Team
 ## 2018-2019
 
-# Creating a Launch Simulation
+# Creating a Launch Simulation:
 - Open the following file: /Scripts/run_passive_control.m
 - To change the rocket physical parameters, go to: /Data_Files/rocket.mat and save any changes
 - The simulator will run with default initial conditions. If you wish to change any of the initial conditions, update the following lines of code:
