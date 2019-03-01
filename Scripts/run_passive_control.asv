@@ -62,6 +62,7 @@ switch parachuteDeployed
                                                                  [0;0;0;0]),...
                                                                  temp_tspan,currentStates,options);
     case true
+    break
     [tNew,tempStates] = ode45(@(tNew,currentStates) main_chute_equations_of_motion(currentStates,rocket,mainChute),...
                                                                  temp_tspan,currentStates,options);
 end
@@ -74,13 +75,11 @@ end
         fprintf("Apogee reached at %0.1f meters \n",states(i,3));
         pause(1);
         parachuteDeployed = true;
-        if simulate_landing == 0
-            break;
-        end
+
     end
     if (parachuteDeployed == true) && (states(i,3) <= 0)
         fprintf("Rocket has landed %0.0f meters away from launch site at %0.1f m/s\n",norm(states(i,1:2)),states(i,6));
-        break
+        break;
     end
 fprintf("time = %0.1f\n",t2);
 end

@@ -48,16 +48,14 @@ switch cameraMode
         grid on
         box on
     case 'plot_circle'
-%         axis off
-%         ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
-%                   'YLim',[min(states(:,2))-10 max(states(:,2))+10],...
-%                   'ZLim',[0                    max(states(:,3))+10]);
-
-
-        %axis equal
+        axis off
+        ax = axes('XLim',[min(states(:,1))-10 max(states(:,1))+10],...
+                  'YLim',[min(states(:,2))-10 max(states(:,2))+10],...
+                  'ZLim',[0                    max(states(:,3))+10]);
+        axis equal
 end
 
-%% Interprit translational and angular position from states matrix
+%% Interp translational and angular position from states matrix
 % Translational position
 pos_i    = states(:,1:3);
 
@@ -68,7 +66,6 @@ u     = states(:,8:10)./sin(theta/2);  % euler axis of rotation
 %% Animate the rocket flight
 switch cameraMode
     case 'follow'
-%            camproj perspective
            camlookat(h); % Set the initial camera view to the rocket
            view([45 45]);
            hold on
@@ -81,7 +78,7 @@ switch cameraMode
                            'translate',pos_i(i-1,:)')); 
                  campos([pos_i(i-1,1) + zoom, pos_i(i-1,2) + zoom, pos_i(i-1,3)]);
                  camtarget(pos_i(i-1,:) + [0 0 rocket.L/2]);           
-                 plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3));
+                 plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3),'m');
             drawnow
            end
     case 'stationary'
@@ -112,10 +109,6 @@ switch cameraMode
         grid on
         box on
         axis equal
-%         plot3(pos_i(:,1), pos_i(:,2), pos_i(:,3),'MarkerSize',1);
-%             xlabel('X');
-%             ylabel('Y');
-%             zlabel('Z');
         radius = norm(states(end,1:2));
         theta = 0 : 0.01 : 2*pi;
         x = radius * cos(theta);
