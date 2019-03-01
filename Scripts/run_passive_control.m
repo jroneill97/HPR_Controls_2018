@@ -10,7 +10,7 @@ load wind;
 load parachutes;
 %% Define your initial conditions and user inputs (inertial reference frame)
 initial_pos      = [0.0 0.0 0.0];  % Initial translational position
-initial_euler    = [0.0 0.0 0.0];  % Initial euler angles
+initial_euler    = [0.0 0.0 0.0];  % Initial euler angles (roll, pitch, yaw)
 initial_vel      = [0.0 0.0 0.0];  % Initial velocity
 initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
 load motorCluster_v3;              % Choose motor configuration. (v1, v2, v3)
