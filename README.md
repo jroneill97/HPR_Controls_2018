@@ -11,7 +11,7 @@ initial_pos      = [0.0 0.0 0.0];  % Initial translational position
 initial_euler    = [0.0 0.0 0.0];  % Initial euler angles
 initial_vel      = [0.0 0.0 0.0];  % Initial velocity
 initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
-load motorCluster_v3;              % Choose motor configuration.
+load motorCluster_v3;              % Choose motor configuration (v1, v2, v3)
 motor_enable     = [1];            % Enable array (length must = # of motors)
 simulate_landing = 1;              % 1: simulate descent 0: break at apogee
 include_wind     = 1;              % 1: include 0: do not include
