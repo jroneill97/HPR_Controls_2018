@@ -30,7 +30,3 @@ plot_type        = 'plot';         % 'plot','plot_circle','follow','stationary'
   - ```'plot'```       : 3D plot of rocket trajectory
   - ```'plot_circle'```: Plots a circle with radius equal to the landing distance
   - ```'follow'```     : Animates the rocket along its flight path (useful for visualizing its rotational motion)
-
-# List of Directories
-- Data_Files: Various .mat files used for simulator
-- 
