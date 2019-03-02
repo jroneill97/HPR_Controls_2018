@@ -1,6 +1,6 @@
-# High Powered Rocketry Major Qualifying Project
+# High Powered Rocketry - Major Qualifying Project
 ## Flight Dynamics and Stability Team
-## 2018-2019
+## Worcester Polytechnic Insitute - 2018-2019
 
 # Creating a Launch Simulation:
 - Open the following file: /Scripts/run_passive_control.m
