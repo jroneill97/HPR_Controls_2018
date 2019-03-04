@@ -82,10 +82,10 @@ M_net_b       = quaternion_I_to_B(q,M_net_i);        % Body-fixed net moments
 w_b          = quaternion_I_to_B(q,states(11:13)); % Body-fixed angular velocity
 %% Omega Matrix and angular momentum to calculate qdot
 Omega       = [[0            states(13) -states(12) states(11)];
-    [-states(13)  0           states(11) states(12)];
-    [ states(12) -states(11)  0          states(13)];
-    [-states(11) -states(12) -states(13) 0         ]];
-H           =  (rocket.I)'.*states(11:13);                   % angular momentum
+              [-states(13)  0           states(11) states(12)];
+              [ states(12) -states(11)  0          states(13)];
+              [-states(11) -states(12) -states(13) 0         ]];
+H           = (rocket.I)'.*states(11:13);                   % angular momentum
 
 %% Define states_i_dot as the solutions to the equations of motion
 posdot_i    = vel_i;                  % inertial frame velocity
