@@ -21,16 +21,6 @@ F_ad_i          = quaternion_B_to_I(q,F_ad_b_quat);
 F_g_i           = [0;0;-9.8*rocket.m];
 
 %% Wind Force
-%     windVel_b   = quaternion_I_to_B(q,[windSpeed;0;0]);
-%     alpha_wind  = -atan2(windVel_b(1),windVel_b(3)); % Angle of attack
-%     beta_wind   = -asin(windVel_b(2)/windSpeed);     % Side-slip
-%
-%     Fx_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cla * rocket.area * sin(alpha_wind);
-%     Fy_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Clb * rocket.area * sin(beta_wind);
-%     Fz_wind        = -0.5*(1.225)*(windSpeed^2)*rocket.Cd * rocket.frontArea;
-%     Fwind_v        = [Fx_wind; Fy_wind; Fz_wind];
-%     q_v            = angle2quat(0,-alpha_wind,beta_wind);
-%     Fwind_b_quat   = quatrotate(quatconj(q_v),Fwind_v')';
 F_wind_i            = [0.5*1.225*(windSpeed^2)*rocket.Cla; 0; 0];
 %% External force
 F_external_i     = F_g_i + F_ad_i + F_wind_i;
