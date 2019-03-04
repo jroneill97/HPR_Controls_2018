@@ -5,9 +5,9 @@
 # Creating a Launch Simulation:
 - Open the following file: /Scripts/run_passive_control.m
 - To change the rocket physical parameters, go to: /Data_Files/rocket.mat and save any changes
-- The simulator will run with default initial conditions. If you wish to change any of the initial conditions, update the following lines of code:
+- The simulator will run with default initial conditions. If you wish to change any of the initial conditions (inertial reference frame), update the following lines of code:
 ```
-initial_pos      = [0.0 0.0 0.0];  % Initial translational position
+initial_pos      = [0.0 0.0 0.0];  % Initial translational positioe
 initial_euler    = [0.0 0.0 0.0];  % Initial euler angles (roll, pitch, yaw)
 initial_vel      = [0.0 0.0 0.0];  % Initial velocity
 initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
