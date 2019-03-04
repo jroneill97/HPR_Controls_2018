@@ -102,17 +102,17 @@ void loop() {
   IMU.getCalibration(&system, &gyroCal, &accelCal, &magCal);
   
   ////////// Create the data string //////////
-  String   dataString  = "Launch: " + (String)launch+" Apogee: " + (String)apogee+" Main Chute: "+(String)mainChute+"\t";                               // Event Booleans
-           dataString += "Time: " + (String)((double)adjustedTime/1000)+"  \t";                                                                           // Current Time
-           dataString += "Corrected alt (m): "          +(String)correctedAlt+"   \t";                                                                    // Current Corrected altitude
-           dataString += "Cal: Sys: " + (String)system+ " Gyro: " + (String)gyroCal+" Accel: " + (String)accelCal+ " Mag: " + (String)magCal+"  \t";      // Calibration values 
+  String   dataString  = "Launch: "              +(String)launch  +" Apogee: " + (String)apogee+" Main Chute: "+(String)mainChute+"\t";                               // Event Booleans
+           dataString += "Time: "                +(String)((double)adjustedTime/1000)+"  \t";                                                                           // Current Time
+           dataString += "Corrected alt (m): "   +(String)correctedAlt+"   \t";                                                                    // Current Corrected altitude
+           dataString += "Cal: Sys: "            +(String)system  +" Gyro: "+ (String)gyroCal+" Accel: " + (String)accelCal+ " Mag: " + (String)magCal+"  \t";      // Calibration values 
            dataString += "Quat: "                +(String)quat.w() +" "+(String)quat.x() +" "+(String)quat.y() +" "+(String)quat.z() +"  \t";             // Quaternions
            dataString += "LinAccel: "            +(String)linearAccel.x()+" "+(String)linearAccel.y()+" "+(String)linearAccel.z()+"  \t";                 // Linear Acceleration
            dataString += "Accel: "               +(String)accel.x()+" "+(String)accel.y()+" "+(String)accel.z()+"  \t";                                   // Accelerometer
            dataString += "Mag: "                 +(String)mag.x()  +" "+(String)mag.y()  +" "+(String)mag.z()  +"  \t";                                   // Magnetometer
            dataString += "Gyro: "                +(String)gyro.x() +" "+(String)gyro.y() +" "+(String)gyro.z() +"   \t";                                  // Gyroscopic sensor
            dataString += "Measured Alt: "        +(String)measuredAlt+"   \t";
-           dataString += "Strain Gague: "               + (String)analogRead(strain1)+"\t"+(String)analogRead(strain2)+"\t"+(String)analogRead(strain3);  // Strain gague readings
+           dataString += "Strain Gague: "        +(String)analogRead(strain1)+"\t"+(String)analogRead(strain2)+"\t"+(String)analogRead(strain3);  // Strain gague readings
 
   ////////// Write the data string to the SD card //////////
   writeToSD(dataString);
