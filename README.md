@@ -1,8 +1,9 @@
 # High Powered Rocketry - Major Qualifying Project
+Alexander Ryan Alvarez, Evan Robert Kelly, Grace Helen Gerhardt, Jackson Keith Whitehouse, John Ryan O'Neill
 ## Flight Dynamics and Stability Team
 ## Worcester Polytechnic Insitute - 2018-2019
 # Introduction:
-(Check back later for link to full report)
+Report: https://digitalcommons.wpi.edu/mqp-all/6725/
 
 The baseline primary goal of the overall project was to design a Class I model rocket to fly to an altitude of 1500 feet and return safely to the ground. Through the collaboration of the entire MQP team, we outlined secondary goals to further challenge ourselves for this project. The secondary goals included the use of CO2 stage separation, electromagnetic booster separation, an autorotation recovery system and actuated fins.
 
