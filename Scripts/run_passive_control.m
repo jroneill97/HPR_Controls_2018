@@ -1,7 +1,7 @@
 % Main launch simulator
 % Authors: WPI Flight Dynamics and Stability MQP team
 % Date:    02/28/2019
-clc; clear; close all;
+clc; clf; clear; %close all;
 addpath('../Functions');
 addpath('../Data_Files');
 options = odeset('JConstant','on', 'RelTol',1e-4, 'AbsTol',1e-4);
@@ -13,15 +13,15 @@ initial_pos      = [0.0 0.0 0.0];  % Initial translational position
 initial_euler    = [0.0 0.0 0.0];  % Initial euler angles (roll, pitch, yaw)
 initial_vel      = [0.0 0.0 0.0];  % Initial velocity
 initial_omega    = [0.0 0.0 0.0];  % Initial rotational velocity
-load motorCluster_v3;              % Choose motor configuration. (v1, v2, v3)
-motor_enable     = [1];            % Enable array (length must = # of motors)
+load motorCluster_v2;              % Choose motor configuration. (v1, v2, v3)
+motor_enable     = [1 1 1];% Enable array (length must = # of motors)
 simulate_landing = 1;              % 1: simulate descent 0: break at apogee
 include_wind     = 1;              % 1: include 0: do not include
 plot_type        = 'follow';         % 'plot','plot_circle','follow','stationary'
 %% Initialize
 states = zeros(1,13); % initialize state matrix
 states(1:3)   = initial_pos';
-states(4:6)   = initial_vel'; states(6) = states(6)+0.0001;
+states(4:6)   = initial_vel'; states(6) = states(6)+0.01;
 states(7:10)  = angle2quat(initial_euler(3)+0.001,initial_euler(2),initial_euler(1),'ZYX');
 states(11:13) = [0.0 0.0 0.0];
 
@@ -29,7 +29,7 @@ parachuteDeployed = false;
 t0       = 0;        % Initial Time
 tf       = 300;      % Final Time (not necessary to adjust)
 nip      = 2;        % Number of integration points
-nsteps   = 10000;
+nsteps   = 5000;
 t        = t0;       % initialize t
 stepSize = tf/nsteps;
 tspan    = [t0:stepSize:tf]';       % Total time span
@@ -79,12 +79,24 @@ end
         end
     end
     if (parachuteDeployed == true) && (states(i,3) <= 0)
-        fprintf("Rocket has landed %0.0f meters away from launch site at %0.1f m/s\n",norm(states(i,1:2)),states(i,6));
+        clc;
+        fprintf("Rocket has landed %0.0f m away from launch site at %0.1f m/s\n",norm(states(i,1:2)),states(i,6));
+        fprintf("Apogee: %0.1f m \n",max(states(:,3)));
+        [~,idx] = min(abs(max(states(:,3)) - states(:,3)));
+        fprintf("Time to apogee: %0.1f s \n",t(idx));
+        fprintf("Time of flight: %0.1f s \n",t(end));
+        fprintf("Motor configuration: ");
+        for i = 1:length(motorCluster)
+            fprintf(motorCluster(i).name);
+            fprintf("   ");
+        end
+        fprintf('\n');
         break
     end
-fprintf("time = %0.1f\n",t2);
+clc;
+fprintf("time = %0.1f s\n",t2);
 end
 %% Animate the resulting state array
-animate_rocket(t,states,rocket,50,plot_type);
+animate_rocket(t,states,rocket,150,plot_type);
 fprintf("Animation Complete \n");
 

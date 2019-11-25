@@ -1,4 +1,6 @@
 clc; clear; close all;
+addpath('../Functions');
+addpath('../Data_Files');
 load rocket;
 load motorCluster_v3;
 load wind;
@@ -31,7 +33,7 @@ abortAngle = deg2rad(5);
 t0       = 0;        % Initial Time
 tf       = 300;       % Final Time
 nip      = 2;        % Number of integration points
-nsteps   = 10000;      % FFT % Number of steps between t0 and tf ("resolution")
+nsteps   = 5000;      % FFT % Number of steps between t0 and tf ("resolution")
 
 t = t0;         % initialize t
 % -------------------------------------------------------------------------
